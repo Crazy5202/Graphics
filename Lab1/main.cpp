@@ -13,7 +13,7 @@ int main() {
     window.setVerticalSyncEnabled(true);
 
     std::vector<sf::CircleShape> points(0); // вектор вершин ломаной
-    sf::VertexArray lines(sf::LineStrip); // вектор отрезков ломаной
+    sf::VertexArray lines(sf::LineStrip, 0); // вектор отрезков ломаной
     bool random_movement = false; // флаг случайного движения
     int mov_ind = -1; // индекс вершины в векторе, которую мы двигаем
 
