@@ -12,8 +12,7 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(desktop.width, desktop.height), "Program window");
     window.setVerticalSyncEnabled(true);
 
-    std::vector<sf::CircleShape> points(0); // вектор вершин ломаной
-    sf::VertexArray lines(sf::LineStrip, 0); // вектор отрезков ломаной
+    std::vector<sf::CircleShape> points; // вектор вершин ломаной
     bool random_movement = false; // флаг случайного движения
     int mov_ind = -1; // индекс вершины в векторе, которую мы двигаем
 
@@ -33,8 +32,6 @@ int main() {
                     point.setOrigin(point.getRadius(), point.getRadius());
                     point.setPosition(event.mouseButton.x, event.mouseButton.y);
                     points.push_back(point);
-
-                    lines.append(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
                 }
 
                 if (event.mouseButton.button == sf::Mouse::Button::Left) { // левая клавиша мыши - "захватываем" вершину для движения
@@ -47,28 +44,17 @@ int main() {
                 }
 
                 if (event.mouseButton.button == sf::Mouse::Button::Middle) { // средняя клавиша мыши - удаляем вершину
-                    int distance = -1;
                     for (auto it=points.begin(); it!=points.end(); ++it) {
                         if (it->getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
-                            distance = std::distance(points.begin(), it);
                             points.erase(it);
                             break;
                         } 
                     }
-                    if (distance != -1) {
-                        int cur_size = lines.getVertexCount();
-                        for (int i = distance; i<cur_size-1; ++i) {
-                            lines[i] = lines[i+1];
-                        }
-                        lines.resize(cur_size-1);
-                    }
-                    
                 }
             }
 
             if (event.type == sf::Event::MouseMoved and mov_ind != -1) { // двигается мышь -> если "захвачена" вершина, двигаем и её
                 points[mov_ind].setPosition(event.mouseMove.x, event.mouseMove.y);
-                lines[mov_ind].position = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
             }
 
             if (event.type == sf::Event::MouseButtonReleased and event.mouseButton.button == sf::Mouse::Button::Left) { // отпускаем левую клавишу мыши - а с ней и вершину
@@ -84,23 +70,32 @@ int main() {
             }
         }
 
-        window.clear(); // очищаем экран
+        window.clear(sf::Color::White); // очищаем экран
 
         if (random_movement and (clock.getElapsedTime().asMilliseconds() >= 200)) { // цикл случайного движения, в нём делаем чтобы вершины не выходили за пределы экрана
             for (int i=0; i<points.size(); ++i) {
                 int new_x = (static_cast<int>(points[i].getPosition().x) + dis_elem(gen)) % desktop.width;
                 int new_y = (static_cast<int>(points[i].getPosition().y) + dis_elem(gen)) % desktop.height;
                 points[i].setPosition(new_x, new_y);
-                lines[i].position = sf::Vector2f(new_x, new_y);
             }
 
             clock.restart();
         }
 
-        for (int i=0; i<points.size(); ++i) { // отрисовываем всё на экране
+        for (int i=0; i<points.size(); ++i) { // отрисовываем точки
             window.draw(points[i]);
         }
-        window.draw(lines);
+        for (int i=1; i<points.size(); ++i) { // отрисовываем линии между точками
+            auto pos_1 = points[i-1].getPosition();
+            auto pos_2 = points[i].getPosition();
+            sf::Vertex line[] = {
+                sf::Vertex(sf::Vector2f(pos_1.x, pos_1.y)),
+                sf::Vertex(sf::Vector2f(pos_2.x, pos_2.y))
+            };
+            line[0].color = sf::Color::Black;
+            line[1].color = sf::Color::Black;
+            window.draw(line, 2, sf::Lines);
+        }
 
         window.display(); // выводим изображение
     }
