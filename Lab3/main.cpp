@@ -91,7 +91,8 @@ void VAO_setup(GLuint VAO, GLuint VBO, GLuint EBO, float vertices[], int ver_siz
 int main() {
     sf::Window window(sf::VideoMode(800, 600), "3D Cube with Two-Point Perspective", sf::Style::Default, sf::ContextSettings(24, 8, 8));
     window.setVerticalSyncEnabled(true);
-
+    
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     if (glewInit() != GLEW_OK) {
         std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -128,7 +129,7 @@ int main() {
     GLuint shaderProgram = createShaderProgram();
     glUseProgram(shaderProgram);
 
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
     glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.0f);
 
     GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "color");
@@ -142,8 +143,8 @@ int main() {
     std::vector<glm::mat4> models(size, glm::mat4(1.0f));
     sf::Clock clock;
 
-    int radx = 10;
-    int rady = 10;
+    int radx = 2;
+    int rady = 2;
     int coeff = 50;
     while (running) {
         sf::Event event;
@@ -156,10 +157,10 @@ int main() {
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) coeff+=10;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) coeff-=10;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) radx+=5;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) radx-=5;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) rady+=5;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) rady-=5;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) radx+=1;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) radx-=1;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) rady+=1;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) rady-=1;
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -169,7 +170,7 @@ int main() {
             float new_x = radx*cos(glm::radians(time));
             float new_y = rady*sin(glm::radians(time));
             glm::mat4 tempMat = glm::translate(models[i], glm::vec3(new_x, new_y, 0.0f));
-            glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(new_x, new_y, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(new_x, new_y, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tempMat));
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -181,7 +182,7 @@ int main() {
             glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
             glDrawElements(GL_TRIANGLES, num_elem, GL_UNSIGNED_INT, 0);
 
-            glUniform3f(vertexColorLocation, 1.0f, 1.0f, 1.0f);
+            glUniform3f(vertexColorLocation, 0.0f, 0.0f, 0.0f);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glEnable(GL_POLYGON_OFFSET_LINE);
             glPolygonOffset(-1.f,-1.f);
