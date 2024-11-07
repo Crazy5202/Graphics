@@ -116,118 +116,35 @@ int main() {
         4, 0, 3, 3, 7, 4,  
         5, 1, 2, 2, 6, 5  
     };
-    float pyramid_vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-        0.0f, 0.0f, 1.0f
-    };
-    unsigned int pyramid_indices[] = {
-        0, 1, 2, 
-        2, 3, 0,
-        0, 1, 4,
-        4, 1, 2,
-        2, 4, 3,
-        3, 4, 0
-    };
 
-    float radius = 1.0f;
-    float height = 2.0f;
-    int slices = 36;
-
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
-
-    float halfHeight = height / 2.0f;
-
-    vertices.push_back(0.0f);     
-    vertices.push_back(halfHeight);
-    vertices.push_back(0.0f); 
-
-    vertices.push_back(0.0f);    
-    vertices.push_back(-halfHeight); 
-    vertices.push_back(0.0f);   
-
-    for (int i = 0; i <= slices; ++i) {
-        float angle = (2.0f * M_PI * i) / slices;
-        float x = radius * cos(angle);
-        float z = radius * sin(angle);
-
-        vertices.push_back(x);
-        vertices.push_back(halfHeight);
-        vertices.push_back(z);
-
-        vertices.push_back(x);
-        vertices.push_back(-halfHeight);
-        vertices.push_back(z);
-    }
-
-    for (int i = 0; i < slices; ++i) {
-        indices.push_back(0);        
-        indices.push_back(2 + i * 2);    
-        indices.push_back(2 + ((i + 1) % slices) * 2);  
-    }
-
-    for (int i = 0; i < slices; ++i) {
-        indices.push_back(1);           
-        indices.push_back(3 + i * 2);  
-        indices.push_back(3 + ((i + 1) % slices) * 2); 
-    }
-
-    for (int i = 0; i < slices; ++i) {
-        int topCurrent = 2 + i * 2;
-        int topNext = 2 + ((i + 1) % slices) * 2;
-        int bottomCurrent = 3 + i * 2;
-        int bottomNext = 3 + ((i + 1) % slices) * 2;
-
-        indices.push_back(topCurrent);
-        indices.push_back(bottomCurrent);
-        indices.push_back(topNext);
-
-        indices.push_back(topNext);
-        indices.push_back(bottomCurrent);
-        indices.push_back(bottomNext);
-    }
-
-    const size_t size = 3;
+    const size_t size = 1;
     std::array<GLuint, size> VBO, VAO, EBO;
     glGenVertexArrays(size, &VAO[0]);
     glGenBuffers(size, &VBO[0]);
     glGenBuffers(size, &EBO[0]);
 
     VAO_setup(VAO[0], VBO[0], EBO[0], cube_vertices, sizeof(cube_vertices), cube_indices, sizeof(cube_indices));
-    VAO_setup(VAO[1], VBO[1], EBO[1], pyramid_vertices, sizeof(pyramid_vertices), pyramid_indices, sizeof(pyramid_indices));
-    VAO_setup(VAO[2], VBO[2], EBO[2], vertices.data(), vertices.size() * sizeof(float), indices.data(), indices.size() * sizeof(float));
 
     GLuint shaderProgram = createShaderProgram();
     glUseProgram(shaderProgram);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.0f);
 
     GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "color");
     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
     GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
     
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
     bool running = true;
 
     std::vector<glm::mat4> models(size, glm::mat4(1.0f));
-    int current = 0;
     sf::Clock clock;
-    models[0] = glm::translate(models[0], glm::vec3(-2.0f, -4.0f, 0.0f));
-    models[1] = glm::translate(models[0], glm::vec3(-1.0f, 1.0f, -0.5f));
-    models[2] = glm::translate(models[1], glm::vec3(-1.0f, 1.0f, 0.5f));
 
-    std::vector<glm::vec3> colors;
-    colors.push_back(glm::vec3(0.5f, 0.0f, 0.0f));
-    colors.push_back(glm::vec3(0.0f, 0.5f, 0.0f));
-    colors.push_back(glm::vec3(0.0f, 0.0f, 0.5f));
-
+    int radx = 10;
+    int rady = 10;
+    int coeff = 50;
     while (running) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -237,31 +154,30 @@ int main() {
             if (event.type == sf::Event::Resized) {
                 glViewport(0, 0, event.size.width, event.size.height);
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) current = 0;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) current = 1;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) current = 2;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) models[current] = glm::translate(models[current], glm::vec3(-0.1, 0.0, 0.0));
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) models[current] = glm::translate(models[current], glm::vec3(0.1, 0.0, 0.0));
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) models[current] = glm::translate(models[current], glm::vec3(0.0, -0.1, 0.0));
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) models[current] = glm::translate(models[current], glm::vec3(0.0, 0.1, 0.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) coeff+=10;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) coeff-=10;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) radx+=5;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) radx-=5;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) rady+=5;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) rady-=5;
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (int i=0; i<size; ++i) {
-            glm::mat4 tempMat;
-            if (i==2)  {
-                tempMat = glm::rotate(models[2], glm::radians(90.f), glm::vec3(1.0f, 0.0f, 0.0f));
-                tempMat = glm::scale(tempMat, glm::vec3(0.5, 0.5, 0.5));
-            } else tempMat = models[i];
+            float time = coeff*clock.getElapsedTime().asSeconds();
+            float new_x = radx*cos(glm::radians(time));
+            float new_y = rady*sin(glm::radians(time));
+            glm::mat4 tempMat = glm::translate(models[i], glm::vec3(new_x, new_y, 0.0f));
+            glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(new_x, new_y, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tempMat));
-            glUniform3f(vertexColorLocation, colors[i][0],  colors[i][1],  colors[i][2]);
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
             glBindVertexArray(VAO[i]);
-            int num_elem;
-            if (i==0) num_elem = 36;
-            else if (i==1) num_elem = 18;
-            else if (i==2) num_elem = indices.size();
+            int num_elem = 36;
+
+            glUniform3f(vertexColorLocation, color[0],  color[1],  color[2]);
             glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
             glDrawElements(GL_TRIANGLES, num_elem, GL_UNSIGNED_INT, 0);
 

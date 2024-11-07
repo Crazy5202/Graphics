@@ -11,7 +11,6 @@ int main() {
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode(); // создание окна
     sf::RenderWindow window(sf::VideoMode(desktop.width, desktop.height), "Program window");
     window.setVerticalSyncEnabled(true);
-
     std::vector<sf::CircleShape> points; // вектор вершин ломаной
     bool random_movement = false; // флаг случайного движения
     int mov_ind = -1; // индекс вершины в векторе, которую мы двигаем
@@ -26,9 +25,9 @@ int main() {
 
             if (event.type == sf::Event::MouseButtonPressed) { // нажали клавишу мыши
                 if (event.mouseButton.button == sf::Mouse::Button::Right) { // правая клавиша мыши - создаём вершину (и отрезок)
-                    sf::CircleShape point(20.f);
+                    sf::CircleShape point(30.f);
                     point.setPointCount(100);
-                    point.setFillColor(sf::Color::Green);
+                    point.setFillColor(sf::Color::Red);
                     point.setOrigin(point.getRadius(), point.getRadius());
                     point.setPosition(event.mouseButton.x, event.mouseButton.y);
                     points.push_back(point);
