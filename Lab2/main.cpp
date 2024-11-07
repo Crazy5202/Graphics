@@ -93,6 +93,7 @@ int main() {
     window.setVerticalSyncEnabled(true);
 
     glEnable(GL_DEPTH_TEST);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     if (glewInit() != GLEW_OK) {
         std::cerr << "Failed to initialize GLEW" << std::endl;
         return -1;
@@ -220,7 +221,7 @@ int main() {
     int current = 0;
     sf::Clock clock;
     models[0] = glm::translate(models[0], glm::vec3(-2.0f, -4.0f, 0.0f));
-    models[1] = glm::translate(models[0], glm::vec3(-1.0f, 1.0f, -0.5f));
+    models[1] = glm::translate(models[0], glm::vec3(-1.0f, 1.1f, -0.5f));
     models[2] = glm::translate(models[1], glm::vec3(-1.0f, 1.0f, 0.5f));
 
     std::vector<glm::vec3> colors;
@@ -265,7 +266,7 @@ int main() {
             glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
             glDrawElements(GL_TRIANGLES, num_elem, GL_UNSIGNED_INT, 0);
 
-            glUniform3f(vertexColorLocation, 1.0f, 1.0f, 1.0f);
+            glUniform3f(vertexColorLocation, 0.0f, 0.0f, 0.0f);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glEnable(GL_POLYGON_OFFSET_LINE);
             glPolygonOffset(-1.f,-1.f);
