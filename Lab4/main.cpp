@@ -4,40 +4,84 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include <vector>
-#include <array>
 
-const char* vertexShaderSource = R"(
+const char* objectVertexShaderSource = R"(
     #version 330 core
-    layout (location = 0) in vec3 position;
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec3 aNormal;
+
+    out vec3 FragPos;
+    out vec3 Normal;
 
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
 
-    uniform vec3 color;
-
-    out vec3 fragColor;
-
     void main()
     {
-        gl_Position = projection * view * model * vec4(position, 1.0);
-        fragColor = color;
+        FragPos = vec3(model * vec4(aPos, 1.0));
+        Normal = aNormal;  
+        
+        gl_Position = projection * view * vec4(FragPos, 1.0);
     }
 )";
 
-const char* fragmentShaderSource = R"(
+const char* objectFragmentShaderSource = R"(
     #version 330 core
-    in vec3 fragColor;
-    out vec4 color;
+    out vec4 FragColor;
+
+    in vec3 FragPos;  
+    in vec3 Normal;  
+    
+    uniform vec3 lightPos; 
+    uniform vec3 lightColor;
+    uniform vec3 objectColor;
 
     void main()
     {
-        color = vec4(fragColor, 1.0);
+        // эмбиент (постоянный цвет)
+        float ambientStrength = 0.1;
+        vec3 ambient = ambientStrength * lightColor;
+        
+        // диффузное освещение (зависит от положения куба и нормали)
+        vec3 norm = normalize(Normal);
+        vec3 lightDir = normalize(lightPos - FragPos);
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = diff * lightColor;
+                
+        // результат - сложение двух
+        vec3 result = (ambient+diffuse) * objectColor;
+        FragColor = vec4(result, 1.0);
+    } 
+)";
+
+const char* lightVertexShaderSource = R"(
+    #version 330 core
+    layout (location = 0) in vec3 aPos;
+
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
+
+    void main()
+    {
+        gl_Position = projection * view * model * vec4(aPos, 1.0);
     }
 )";
 
-GLuint compileShader(GLenum type, const char* source) {
+const char* lightFragmentShaderSource = R"(
+    #version 330 core
+    out vec4 FragColor;
+
+    uniform vec3 lightColor;
+
+    void main()
+    {
+        FragColor = vec4(lightColor, 1.0);
+    }
+)";
+
+GLuint compileShader(GLenum type, const char* source) { // компиляция шейдера
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
@@ -52,7 +96,7 @@ GLuint compileShader(GLenum type, const char* source) {
     return shader;
 }
 
-GLuint createShaderProgram() {
+GLuint createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) { // создание шейдерной программы
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
     GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
@@ -75,77 +119,127 @@ GLuint createShaderProgram() {
     return shaderProgram;
 }
 
-void VAO_setup(GLuint VAO, GLuint VBO, GLuint EBO, float vertices[], int ver_size, unsigned int indices[], int ind_size) {
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, ver_size, vertices, GL_DYNAMIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ind_size, indices, GL_DYNAMIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-}
-
 int main() {
-    sf::Window window(sf::VideoMode(800, 600), "3D Cube with Two-Point Perspective", sf::Style::Default, sf::ContextSettings(24, 8, 8));
+    // окно
+    sf::Window window(sf::VideoMode(800, 600), "Lightpost", sf::Style::Default, sf::ContextSettings(24, 8, 8));
     window.setVerticalSyncEnabled(true);
     
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    // всякие настройки
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     if (glewInit() != GLEW_OK) {
         std::cerr << "Failed to initialize GLEW" << std::endl;
         return -1;
     }
     
-    float cube_vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+    // вершины куба
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
-    unsigned int cube_indices[] = {
-        0, 1, 2, 2, 3, 0,  
-        4, 5, 6, 6, 7, 4,  
-        4, 5, 1, 1, 0, 4,  
-        7, 6, 2, 2, 3, 7,  
-        4, 0, 3, 3, 7, 4,  
-        5, 1, 2, 2, 6, 5  
-    };
 
-    const size_t size = 1;
-    std::array<GLuint, size> VBO, VAO, EBO;
-    glGenVertexArrays(size, &VAO[0]);
-    glGenBuffers(size, &VBO[0]);
-    glGenBuffers(size, &EBO[0]);
+    // куб-объект
+    unsigned int VBO, cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &VBO);
 
-    VAO_setup(VAO[0], VBO[0], EBO[0], cube_vertices, sizeof(cube_vertices), cube_indices, sizeof(cube_indices));
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    GLuint shaderProgram = createShaderProgram();
-    glUseProgram(shaderProgram);
+    glBindVertexArray(cubeVAO);
 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // куб света 
+    unsigned int lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // создаём соответственные шейдерные программы
+    GLuint objectShaderProgram = createShaderProgram(objectVertexShaderSource, objectFragmentShaderSource);
+    GLuint lightShaderProgram = createShaderProgram(lightVertexShaderSource, lightFragmentShaderSource);
+
+    // задаём матрицы проекции и камеры
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    glm::vec3 color = glm::vec3(0.5f, 0.0f, 0.0f);
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "color");
-    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-    GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-    GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
+    // параметры освещения
+    glm::vec3 lightPos(glm::vec3(-0.2f, -0.2f, 0.3f));
+    glm::mat4 lightMat = glm::scale(glm::translate(glm::mat4(1.0f), lightPos), glm::vec3(0.2f));
+    glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+    glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+
+    // заносим все матрицы отображения и вектор света в световой куб, т.к. он не меняется
+    glUseProgram(lightShaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(lightShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(lightMat));
+
+    glUniform3fv(glGetUniformLocation(lightShaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
     
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    // закидываем матрицы в куб-объект
+    glUseProgram(objectShaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+    // закидываем параметры освещения в куб-объект
+    glUniform3fv(glGetUniformLocation(objectShaderProgram, "objectColor"), 1, glm::value_ptr(objectColor));
+    glUniform3fv(glGetUniformLocation(objectShaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
+    glUniform3fv(glGetUniformLocation(objectShaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
+
+    int size = 1;
+    std::vector<glm::mat4> models(size, glm::mat4(1.0f));
+    models[0] = glm::translate(models[0], glm::vec3(-1.5f, -1.5f, 0.0f));
     bool running = true;
 
-    std::vector<glm::mat4> models(size, glm::mat4(1.0f));
-    sf::Clock clock;
-
-    int radx = 2;
-    int rady = 2;
-    int coeff = 50;
     while (running) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -155,48 +249,34 @@ int main() {
             if (event.type == sf::Event::Resized) {
                 glViewport(0, 0, event.size.width, event.size.height);
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) coeff+=10;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) coeff-=10;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) radx+=1;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) radx-=1;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) rady+=1;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) rady-=1;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) models[0] = glm::translate(models[0], glm::vec3(-0.1, 0.0, 0.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) models[0] = glm::translate(models[0], glm::vec3(0.1, 0.0, 0.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) models[0] = glm::translate(models[0], glm::vec3(0.0, -0.1, 0.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.1, 0.0));
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i=0; i<size; ++i) {
-            float time = coeff*clock.getElapsedTime().asSeconds();
-            float new_x = radx*cos(glm::radians(time));
-            float new_y = rady*sin(glm::radians(time));
-            glm::mat4 tempMat = glm::translate(models[i], glm::vec3(new_x, new_y, 0.0f));
-            glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(new_x, new_y, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        // отрисовка кубика-объекта
+        glUseProgram(objectShaderProgram);
 
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tempMat));
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(models[0]));
 
-            glBindVertexArray(VAO[i]);
-            int num_elem = 36;
+        glBindVertexArray(cubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
-            glUniform3f(vertexColorLocation, color[0],  color[1],  color[2]);
-            glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-            glDrawElements(GL_TRIANGLES, num_elem, GL_UNSIGNED_INT, 0);
-
-            glUniform3f(vertexColorLocation, 0.0f, 0.0f, 0.0f);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glEnable(GL_POLYGON_OFFSET_LINE);
-            glPolygonOffset(-1.f,-1.f);
-
-            glDrawElements(GL_TRIANGLES, num_elem, GL_UNSIGNED_INT, 0);
-        }
+        // отрисовка кубика света
+        glUseProgram(lightShaderProgram);
+        glBindVertexArray(lightCubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        
 
         window.display();
     }
 
-    glDeleteVertexArrays(size, &VAO[0]);
-    glDeleteBuffers(size, &VBO[0]);
-    glDeleteBuffers(size, &EBO[0]);
-    glDeleteProgram(shaderProgram);
-
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &lightCubeVAO);
+    glDeleteBuffers(1, &VBO);
+    window.close();
     return 0;
 }
