@@ -38,6 +38,9 @@ const char* objectFragmentShaderSource = R"(
     uniform vec3 objectColor;
     uniform vec3 viewPos;
 
+    uniform float linear;
+    uniform float quadr;
+
     void main()
     {
         // реализация прожектора
@@ -68,7 +71,7 @@ const char* objectFragmentShaderSource = R"(
 
             // затухание света
             float distance = length(lightPos - FragPos);
-            float attenuation = 1.0 / (1.0f + 0.22 * distance + 0.2 * (distance * distance));    
+            float attenuation = 1.0 / (1.0f + linear * distance + quadr * (distance * distance));    
 
             diffuse *= attenuation;
             specular *= attenuation; 
@@ -276,6 +279,9 @@ int main() {
     glm::mat4 rot_vert(1.0f);
     bool running = true;
 
+    float linear = 0.35;
+    float quadr = 0.34;
+
     while (running) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -295,6 +301,16 @@ int main() {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.0, 0.1));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.0, -0.1));
 
+            // изменение мощности освещения
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                linear = std::max(linear-0.05, 0.0);
+                quadr = std::max(quadr-0.05, 0.0);
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {            
+                linear+=0.05;
+                quadr+=0.05;
+            }
+
             // вращение куба
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) rot_hor = glm::rotate(rot_hor, glm::radians(-10.0f), glm::vec3(0.0, 0.0, 1.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) rot_hor = glm::rotate(rot_hor, glm::radians(10.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -308,6 +324,8 @@ int main() {
         glUseProgram(objectShaderProgram);
 
         glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(models[0]*rot_hor*rot_vert, glm::vec3(0.5f))));
+        glUniform1f(glGetUniformLocation(objectShaderProgram, "linear"), linear);
+        glUniform1f(glGetUniformLocation(objectShaderProgram, "quadr"), quadr);
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
