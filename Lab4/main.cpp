@@ -50,7 +50,7 @@ const char* objectFragmentShaderSource = R"(
         float cutOff = cos(radians(45.0));
 
         // эмбиент (постоянный цвет)
-        float ambientStrength = 0.5;
+        float ambientStrength = 0.1;
         vec3 ambient = ambientStrength * lightColor;
 
         vec3 result;
@@ -62,7 +62,7 @@ const char* objectFragmentShaderSource = R"(
             float diff = max(dot(norm, lightDir), 0.0);
             vec3 diffuse = diff * lightColor;
             
-            // отражения
+            // блики
             float specularStrength = 1.0;
             vec3 viewDir = normalize(viewPos - FragPos);
             vec3 reflectDir = reflect(-lightDir, norm);  
