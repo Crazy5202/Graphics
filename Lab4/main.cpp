@@ -50,7 +50,7 @@ const char* objectFragmentShaderSource = R"(
         float cutOff = cos(radians(45.0));
 
         // эмбиент (постоянный цвет)
-        float ambientStrength = 0.1;
+        float ambientStrength = 0.5;
         vec3 ambient = ambientStrength * lightColor;
 
         vec3 result;
@@ -151,9 +151,119 @@ GLuint createShaderProgram(const char* vertexShaderSource, const char* fragmentS
     return shaderProgram;
 }
 
+void generateCylinder(float radius, float height, int slices, std::vector<float>& vertices, std::vector<unsigned int>& indices) {
+    float halfHeight = height / 2.0f;
+
+    // Add top center vertex
+    vertices.push_back(0.0f);        // x
+    vertices.push_back(0.0f);  // y
+    vertices.push_back(halfHeight);        // z
+
+    // top center normal    
+    vertices.push_back(0.0f);        // x
+    vertices.push_back(0.0f);  // y
+    vertices.push_back(1.0f);        // z
+
+    // Add bottom center vertex
+    vertices.push_back(0.0f);        // x
+    vertices.push_back(0.0f); // y
+    vertices.push_back(-halfHeight);        // z
+
+    // bottom center normal    
+    vertices.push_back(0.0f);        // x
+    vertices.push_back(0.0f);  // y
+    vertices.push_back(-1.0f);        // z
+
+    // Generate circle vertices for top and bottom
+
+    // боковая отрисовка
+    for (int i = 0; i < slices; ++i) {
+        float angle = (2.0f * M_PI * i) / slices;
+        float x = radius * cos(angle);
+        float y = radius * sin(angle);
+            // Top circle
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(halfHeight);
+
+        // top circle normal    
+        vertices.push_back(x);        // x
+        vertices.push_back(y);  // y
+        vertices.push_back(0.0f);        // z
+    
+        // Bottom circle
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(-halfHeight);
+
+        // bottom circle normal    
+        vertices.push_back(x);        // x
+        vertices.push_back(y);  // y
+        vertices.push_back(0.0f);        // z
+    }
+
+    for (int i = 0; i < slices; ++i) {
+        float zero = 0;
+        float angle = (2.0f * M_PI * i) / slices;
+        float x = radius * cos(angle);
+        float y = radius * sin(angle);
+            // Top circle
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(halfHeight);
+
+        // top circle normal    
+        vertices.push_back(zero);        // x
+        vertices.push_back(zero);  // y
+        vertices.push_back(1.0f);        // z
+    
+        // Bottom circle
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(-halfHeight);
+
+        // bottom circle normal    
+        vertices.push_back(zero);        // x
+        vertices.push_back(zero);  // y
+        vertices.push_back(-1.0f);        // z
+    }
+
+    int jump = slices*2;
+    // Indices for the top circle
+    for (int i = 0; i < slices; ++i) {
+        indices.push_back(0);                // top center
+        indices.push_back(jump + 2 + i * 2);        // current top vertex
+        indices.push_back(jump + 2 + ((i + 1) % slices) * 2);  // next top vertex
+    }
+
+    // Indices for the bottom circle
+    for (int i = 0; i < slices; ++i) {
+        indices.push_back(1);                // bottom center
+        indices.push_back(jump + 3 + i * 2);        // current bottom vertex
+        indices.push_back(jump + 3 + ((i + 1) % slices) * 2);  // next bottom vertex
+    }
+
+    // Indices for the side surface
+    for (int i = 0; i < slices; ++i) {
+        int topCurrent = 2 + i * 2;
+        int topNext = 2 + ((i + 1) % slices) * 2;
+        int bottomCurrent = 3 + i * 2;
+        int bottomNext = 3 + ((i + 1) % slices) * 2;
+
+        // First triangle
+        indices.push_back(topCurrent);
+        indices.push_back(bottomCurrent);
+        indices.push_back(topNext);
+
+        // Second triangle
+        indices.push_back(topNext);
+        indices.push_back(bottomCurrent);
+        indices.push_back(bottomNext);
+    }
+}
+
 int main() {
     // окно
-    
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode(); // создание окна
     sf::Window window(sf::VideoMode(desktop.width, desktop.height), "Lightpost", sf::Style::Default, sf::ContextSettings(24, 8, 8));
     window.setVerticalSyncEnabled(true);
@@ -167,7 +277,7 @@ int main() {
     }
     
     // вершины куба
-    float vertices[] = {
+    float cubeVertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -211,15 +321,38 @@ int main() {
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
+    // Cylinder parameters
+    float radius = 0.5f;
+    float height = 1.5f;
+    int slices = 36;
+
+    // Store vertices and indices
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+    generateCylinder(0.5f, 1.5f, 36, vertices, indices);
+/*
+    // вершины цилиндра
+    std::vector<Vertex> cylVertices;
+    std::vector<unsigned int> cylIndices;
+
+    float radius = 1.0f;
+    float height = 2.0f;
+    int segments = 36;
+
+    generateCylinder(radius, height, segments, cylVertices, cylIndices);
+*/  
     // куб-объект
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
+    unsigned int cylVAO, cylVBO, cylEBO;
+    glGenVertexArrays(1, &cylVAO);
+    glBindVertexArray(cylVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glGenBuffers(1, &cylVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cylVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -228,11 +361,13 @@ int main() {
     glEnableVertexAttribArray(1);
 
     // куб света 
-    unsigned int lightCubeVAO;
+    unsigned int lightCubeVAO, lightCubeVBO;
     glGenVertexArrays(1, &lightCubeVAO);
     glBindVertexArray(lightCubeVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &lightCubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -327,8 +462,8 @@ int main() {
         glUniform1f(glGetUniformLocation(objectShaderProgram, "linear"), linear);
         glUniform1f(glGetUniformLocation(objectShaderProgram, "quadr"), quadr);
 
-        glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(cylVAO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
         // отрисовка кубика света
         glUseProgram(lightShaderProgram);
@@ -339,9 +474,11 @@ int main() {
         window.display();
     }
 
-    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &cylVAO);
     glDeleteVertexArrays(1, &lightCubeVAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &cylVBO);
+    glDeleteBuffers(1, &lightCubeVBO);
+    glDeleteBuffers(1, &cylEBO);
     window.close();
     return 0;
 }
