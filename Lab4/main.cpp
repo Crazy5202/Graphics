@@ -33,9 +33,10 @@ const char* objectFragmentShaderSource = R"(
     in vec3 FragPos;  
     in vec3 Normal;  
     
-    uniform vec3 lightPos; 
+    uniform vec3 lightPos;
     uniform vec3 lightColor;
     uniform vec3 objectColor;
+    uniform vec3 viewPos;
 
     void main()
     {
@@ -48,9 +49,16 @@ const char* objectFragmentShaderSource = R"(
         vec3 lightDir = normalize(lightPos - FragPos);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = diff * lightColor;
-                
+        
+        // отражения
+        float specularStrength = 1.0;
+        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 reflectDir = reflect(-lightDir, norm);  
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        vec3 specular = specularStrength * spec * lightColor;  
+
         // результат - сложение двух
-        vec3 result = (ambient+diffuse) * objectColor;
+        vec3 result = (ambient + diffuse + specular) * objectColor;
         FragColor = vec4(result, 1.0);
     } 
 )";
@@ -209,7 +217,9 @@ int main() {
 
     // задаём матрицы проекции и камеры
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
     // параметры освещения
     glm::vec3 lightPos(glm::vec3(-0.2f, -0.2f, 0.3f));
@@ -234,6 +244,7 @@ int main() {
     glUniform3fv(glGetUniformLocation(objectShaderProgram, "objectColor"), 1, glm::value_ptr(objectColor));
     glUniform3fv(glGetUniformLocation(objectShaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
     glUniform3fv(glGetUniformLocation(objectShaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniform3fv(glGetUniformLocation(objectShaderProgram, "viewPos"), 1, glm::value_ptr(cameraPos));
 
     int size = 1;
     std::vector<glm::mat4> models(size, glm::mat4(1.0f));
