@@ -154,52 +154,51 @@ GLuint createShaderProgram(const char* vertexShaderSource, const char* fragmentS
 void generateCylinder(float radius, float height, int slices, std::vector<float>& vertices, std::vector<unsigned int>& indices) {
     float halfHeight = height / 2.0f;
 
-    // Add top center vertex
-    vertices.push_back(0.0f);        // x
-    vertices.push_back(0.0f);  // y
-    vertices.push_back(halfHeight);        // z
+    // верхний центр
+    vertices.push_back(0.0f);        
+    vertices.push_back(0.0f);  
+    vertices.push_back(halfHeight);        
 
-    // top center normal    
-    vertices.push_back(0.0f);        // x
-    vertices.push_back(0.0f);  // y
-    vertices.push_back(1.0f);        // z
+    // его нормаль  
+    vertices.push_back(0.0f);        
+    vertices.push_back(0.0f);  
+    vertices.push_back(1.0f);        
 
-    // Add bottom center vertex
-    vertices.push_back(0.0f);        // x
-    vertices.push_back(0.0f); // y
-    vertices.push_back(-halfHeight);        // z
+    // нижний центр
+    vertices.push_back(0.0f);        
+    vertices.push_back(0.0f); 
+    vertices.push_back(-halfHeight);        
 
-    // bottom center normal    
-    vertices.push_back(0.0f);        // x
-    vertices.push_back(0.0f);  // y
-    vertices.push_back(-1.0f);        // z
+    // его нормаль  
+    vertices.push_back(0.0f);        
+    vertices.push_back(0.0f);  
+    vertices.push_back(-1.0f);        
 
-    // Generate circle vertices for top and bottom
-
-    // боковая отрисовка
+    // вершины для боковой отрисовки (разные нормали)
     for (int i = 0; i < slices; ++i) {
         float angle = (2.0f * M_PI * i) / slices;
         float x = radius * cos(angle);
         float y = radius * sin(angle);
-            // Top circle
+        
+        // верхний круг
         vertices.push_back(x);
         vertices.push_back(y);
         vertices.push_back(halfHeight);
 
-        // top circle normal    
-        vertices.push_back(x);        // x
-        vertices.push_back(y);  // y
-        vertices.push_back(0.0f);        // z
+        // нормаль   
+        vertices.push_back(x);        
+        vertices.push_back(y);  
+        vertices.push_back(0.0f);        
     
-        // Bottom circle
+        // нижний круг
         vertices.push_back(x);
         vertices.push_back(y);
         vertices.push_back(-halfHeight);
 
-        // bottom circle normal    
-        vertices.push_back(x);        // x
-        vertices.push_back(y);  // y
-        vertices.push_back(0.0f);        // z
+        // нормаль  
+        vertices.push_back(x);        
+        vertices.push_back(y);  
+        vertices.push_back(0.0f);        
     }
 
     for (int i = 0; i < slices; ++i) {
@@ -207,55 +206,56 @@ void generateCylinder(float radius, float height, int slices, std::vector<float>
         float angle = (2.0f * M_PI * i) / slices;
         float x = radius * cos(angle);
         float y = radius * sin(angle);
-            // Top circle
+        
+        // верхний круг
         vertices.push_back(x);
         vertices.push_back(y);
         vertices.push_back(halfHeight);
 
-        // top circle normal    
-        vertices.push_back(zero);        // x
-        vertices.push_back(zero);  // y
-        vertices.push_back(1.0f);        // z
+        // нормаль  
+        vertices.push_back(zero);        
+        vertices.push_back(zero);  
+        vertices.push_back(1.0f);        
     
-        // Bottom circle
+        // нижний круг
         vertices.push_back(x);
         vertices.push_back(y);
         vertices.push_back(-halfHeight);
 
-        // bottom circle normal    
-        vertices.push_back(zero);        // x
-        vertices.push_back(zero);  // y
-        vertices.push_back(-1.0f);        // z
+        // нормаль
+        vertices.push_back(zero);        
+        vertices.push_back(zero);  
+        vertices.push_back(-1.0f);        
     }
 
     int jump = slices*2;
-    // Indices for the top circle
+    // индексы для верхнего круга
     for (int i = 0; i < slices; ++i) {
-        indices.push_back(0);                // top center
-        indices.push_back(jump + 2 + i * 2);        // current top vertex
-        indices.push_back(jump + 2 + ((i + 1) % slices) * 2);  // next top vertex
+        indices.push_back(0);                // верхний центр
+        indices.push_back(jump + 2 + i * 2);        // текущая верхняя вершщина
+        indices.push_back(jump + 2 + ((i + 1) % slices) * 2);  // следующая верхняя вершина
     }
 
-    // Indices for the bottom circle
+    // индексы для нижнего круга
     for (int i = 0; i < slices; ++i) {
-        indices.push_back(1);                // bottom center
-        indices.push_back(jump + 3 + i * 2);        // current bottom vertex
-        indices.push_back(jump + 3 + ((i + 1) % slices) * 2);  // next bottom vertex
+        indices.push_back(1);                // нижний центр
+        indices.push_back(jump + 3 + i * 2);        // текущая нижняя вершина
+        indices.push_back(jump + 3 + ((i + 1) % slices) * 2);  // следующая нижняя вершина
     }
 
-    // Indices for the side surface
+    // индексы для боковой поверхности
     for (int i = 0; i < slices; ++i) {
         int topCurrent = 2 + i * 2;
         int topNext = 2 + ((i + 1) % slices) * 2;
         int bottomCurrent = 3 + i * 2;
         int bottomNext = 3 + ((i + 1) % slices) * 2;
 
-        // First triangle
+        // первый треугольник
         indices.push_back(topCurrent);
         indices.push_back(bottomCurrent);
         indices.push_back(topNext);
 
-        // Second triangle
+        // второй треугольник
         indices.push_back(topNext);
         indices.push_back(bottomCurrent);
         indices.push_back(bottomNext);
@@ -264,7 +264,7 @@ void generateCylinder(float radius, float height, int slices, std::vector<float>
 
 int main() {
     // окно
-    sf::VideoMode desktop = sf::VideoMode::getDesktopMode(); // создание окна
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     sf::Window window(sf::VideoMode(desktop.width, desktop.height), "Lightpost", sf::Style::Default, sf::ContextSettings(24, 8, 8));
     window.setVerticalSyncEnabled(true);
     
@@ -321,28 +321,16 @@ int main() {
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
-    // Cylinder parameters
-    float radius = 0.5f;
-    float height = 1.5f;
-    int slices = 36;
-
-    // Store vertices and indices
+    // вершины пирамиды
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
+    float radius = 0.5;
+    float height = 1.5;
+    int slices = 36;
+    generateCylinder(radius, height, 36, vertices, indices);
+    std::cout << indices.size() << std::endl;
 
-    generateCylinder(0.5f, 1.5f, 36, vertices, indices);
-/*
-    // вершины цилиндра
-    std::vector<Vertex> cylVertices;
-    std::vector<unsigned int> cylIndices;
-
-    float radius = 1.0f;
-    float height = 2.0f;
-    int segments = 36;
-
-    generateCylinder(radius, height, segments, cylVertices, cylIndices);
-*/  
-    // куб-объект
+    // объект
     unsigned int cylVAO, cylVBO, cylEBO;
     glGenVertexArrays(1, &cylVAO);
     glBindVertexArray(cylVAO);
@@ -396,12 +384,12 @@ int main() {
 
     glUniform3fv(glGetUniformLocation(lightShaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
     
-    // закидываем матрицы в куб-объект
+    // закидываем матрицы в объект
     glUseProgram(objectShaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
-    // закидываем параметры освещения в куб-объект
+    // закидываем параметры освещения в объект
     glUniform3fv(glGetUniformLocation(objectShaderProgram, "objectColor"), 1, glm::value_ptr(objectColor));
     glUniform3fv(glGetUniformLocation(objectShaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
     glUniform3fv(glGetUniformLocation(objectShaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
@@ -426,13 +414,13 @@ int main() {
             if (event.type == sf::Event::Resized) {
                 glViewport(0, 0, event.size.width, event.size.height);
             }
-            // перемещение куба по плоскости
+            // перемещение объекта по плоскости
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) models[0] = glm::translate(models[0], glm::vec3(-0.1, 0.0, 0.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) models[0] = glm::translate(models[0], glm::vec3(0.1, 0.0, 0.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) models[0] = glm::translate(models[0], glm::vec3(0.0, -0.1, 0.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.1, 0.0));
 
-            // перемещение куба вниз-вверх
+            // перемещение объекта вниз-вверх
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.0, 0.1));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.0, -0.1));
 
@@ -455,7 +443,7 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // отрисовка кубика-объекта
+        // отрисовка объекта
         glUseProgram(objectShaderProgram);
 
         glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(models[0]*rot_hor*rot_vert, glm::vec3(0.5f))));
