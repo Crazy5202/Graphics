@@ -20,7 +20,7 @@ const char* objectVertexShaderSource = R"(
     void main()
     {
         FragPos = vec3(model * vec4(aPos, 1.0));
-        Normal = aNormal;  
+        Normal = mat3(transpose(inverse(model))) * aNormal; 
         
         gl_Position = projection * view * vec4(FragPos, 1.0);
     }
@@ -40,25 +40,46 @@ const char* objectFragmentShaderSource = R"(
 
     void main()
     {
+        // реализация прожектора
+        vec3 zDir = vec3(0.0, 0.0, 1.0);
+        vec3 lightDir = normalize(lightPos - FragPos);
+        float theta = dot(lightDir, zDir);
+        float cutOff = cos(radians(45.0));
+
         // эмбиент (постоянный цвет)
         float ambientStrength = 0.1;
         vec3 ambient = ambientStrength * lightColor;
-        
-        // диффузное освещение (зависит от положения куба и нормали)
-        vec3 norm = normalize(Normal);
-        vec3 lightDir = normalize(lightPos - FragPos);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = diff * lightColor;
-        
-        // отражения
-        float specularStrength = 1.0;
-        vec3 viewDir = normalize(viewPos - FragPos);
-        vec3 reflectDir = reflect(-lightDir, norm);  
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        vec3 specular = specularStrength * spec * lightColor;  
 
-        // результат - сложение двух
-        vec3 result = (ambient + diffuse + specular) * objectColor;
+        vec3 result;
+        if (theta > cutOff) 
+        {
+            // диффузное освещение (зависит от положения куба и нормали)
+            vec3 norm = normalize(Normal);
+            
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 diffuse = diff * lightColor;
+            
+            // отражения
+            float specularStrength = 1.0;
+            vec3 viewDir = normalize(viewPos - FragPos);
+            vec3 reflectDir = reflect(-lightDir, norm);  
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+            vec3 specular = specularStrength * spec * lightColor;
+
+            // затухание света
+            float distance = length(lightPos - FragPos);
+            float attenuation = 1.0 / (1.0f + 0.22 * distance + 0.2 * (distance * distance));    
+
+            diffuse *= attenuation;
+            specular *= attenuation; 
+
+            // результат - сложение других составляющих освещения
+            result = (ambient + diffuse + specular) * objectColor;
+        } 
+        else 
+        {
+            result = ambient * objectColor;
+        }
         FragColor = vec4(result, 1.0);
     } 
 )";
@@ -129,7 +150,9 @@ GLuint createShaderProgram(const char* vertexShaderSource, const char* fragmentS
 
 int main() {
     // окно
-    sf::Window window(sf::VideoMode(800, 600), "Lightpost", sf::Style::Default, sf::ContextSettings(24, 8, 8));
+    
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode(); // создание окна
+    sf::Window window(sf::VideoMode(desktop.width, desktop.height), "Lightpost", sf::Style::Default, sf::ContextSettings(24, 8, 8));
     window.setVerticalSyncEnabled(true);
     
     // всякие настройки
@@ -216,14 +239,14 @@ int main() {
     GLuint lightShaderProgram = createShaderProgram(lightVertexShaderSource, lightFragmentShaderSource);
 
     // задаём матрицы проекции и камеры
-    glm::mat4 projection = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(90.0f), float(desktop.width / desktop.height), 0.1f, 100.0f);
     
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
     // параметры освещения
-    glm::vec3 lightPos(glm::vec3(-0.2f, -0.2f, 0.3f));
-    glm::mat4 lightMat = glm::scale(glm::translate(glm::mat4(1.0f), lightPos), glm::vec3(0.2f));
+    glm::vec3 lightPos(glm::vec3(-0.7f, -0.7f, 1.0f));
+    glm::mat4 lightMat = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), lightPos), glm::radians(45.0f), glm::vec3(0.0, 0.0, 1.0)), glm::vec3(0.2f));
     glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
     glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
 
@@ -249,6 +272,8 @@ int main() {
     int size = 1;
     std::vector<glm::mat4> models(size, glm::mat4(1.0f));
     models[0] = glm::translate(models[0], glm::vec3(-1.5f, -1.5f, 0.0f));
+    glm::mat4 rot_hor(1.0f);
+    glm::mat4 rot_vert(1.0f);
     bool running = true;
 
     while (running) {
@@ -260,10 +285,21 @@ int main() {
             if (event.type == sf::Event::Resized) {
                 glViewport(0, 0, event.size.width, event.size.height);
             }
+            // перемещение куба по плоскости
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) models[0] = glm::translate(models[0], glm::vec3(-0.1, 0.0, 0.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) models[0] = glm::translate(models[0], glm::vec3(0.1, 0.0, 0.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) models[0] = glm::translate(models[0], glm::vec3(0.0, -0.1, 0.0));
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.1, 0.0));
+
+            // перемещение куба вниз-вверх
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.0, 0.1));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) models[0] = glm::translate(models[0], glm::vec3(0.0, 0.0, -0.1));
+
+            // вращение куба
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) rot_hor = glm::rotate(rot_hor, glm::radians(-10.0f), glm::vec3(0.0, 0.0, 1.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) rot_hor = glm::rotate(rot_hor, glm::radians(10.0f), glm::vec3(0.0, 0.0, 1.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) rot_vert = glm::rotate(rot_vert, glm::radians(-10.0f), glm::vec3(1.0, 1.0, 0.0));
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) rot_vert = glm::rotate(rot_vert, glm::radians(10.0f), glm::vec3(1.0, 1.0, 0.0));
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -271,7 +307,7 @@ int main() {
         // отрисовка кубика-объекта
         glUseProgram(objectShaderProgram);
 
-        glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(models[0]));
+        glUniformMatrix4fv(glGetUniformLocation(objectShaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::scale(models[0]*rot_hor*rot_vert, glm::vec3(0.5f))));
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
