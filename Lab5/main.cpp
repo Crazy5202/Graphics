@@ -1,4 +1,3 @@
-#include <SFML/Graphics.hpp>
 #include "raytracer.hpp"
 #include "ppm.hpp"
 
@@ -40,11 +39,6 @@ int main() {
         {
             Vector3 direction = camera.getRayDirection(x, y, width, height);
             Vector3 color = traceRay(camera.position, direction, spheres, planes, cubes, lights, traceDepth);
-            sf::Color pixelColor(
-                std::min(255, static_cast<int>(color.x * 255)),
-                std::min(255, static_cast<int>(color.y * 255)),
-                std::min(255, static_cast<int>(color.z * 255))
-            );
             image.set_pixel(x, y, 
                 std::min(255, static_cast<int>(color.x * 255)), 
                 std::min(255, static_cast<int>(color.y * 255)), 
@@ -53,6 +47,6 @@ int main() {
     }
 
     image.write_file("output.ppm");
-
+    std::cout << "Готово!" << std::endl;
     return 0;
 }

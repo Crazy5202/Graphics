@@ -11,4 +11,4 @@ add_library(lab_lib ${SOURCES})
 
 add_executable(main main.cpp)
 
-target_link_libraries(main lab_lib sfml-graphics sfml-window sfml-system)
+target_link_libraries(main lab_lib)
