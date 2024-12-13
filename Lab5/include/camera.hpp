@@ -3,8 +3,9 @@
 
 #include "vector3.hpp"
 
-struct Camera
+class Camera
 {
+public:
     Vector3 position;
     Vector3 forward;
     Vector3 up;

@@ -3,8 +3,9 @@
 
 #include "vector3.hpp"
 
-struct Light
+class Light
 {
+public:
     Vector3 position;
     Vector3 intensity;
 

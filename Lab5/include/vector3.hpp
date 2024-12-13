@@ -1,8 +1,9 @@
 #ifndef VECTOR3_HPP
 #define VECTOR3_HPP
 
-struct Vector3
+class Vector3
 {
+public:
     float x, y, z;
 
     Vector3();

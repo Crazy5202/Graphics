@@ -1,23 +1,23 @@
 #include <SFML/Graphics.hpp>
 #include "raytracer.hpp"
+#include "ppm.hpp"
 
-int traceDepth = 5;
+int traceDepth = 3;
 
-int main()
-{
-    sf::RenderWindow window(sf::VideoMode(1200, 1000), "Ray Tracing");
-    sf::Image image;
-    image.create(1200, 1000);
+int main() {
+    int width = 1920;
+    int height = 1080;
+    PPM image(width, height);
 
     std::vector<Sphere> spheres =
     {
-        Sphere(Vector3(0, -1, 5), 1, Vector3(1, 0, 0), 0.5, 0.5, 1.5),
-        Sphere(Vector3(2, 0, 4), 1, Vector3(0, 1, 0), 0.5, 0.5, 1.5),
+        Sphere(Vector3(0, -1, 5), 1, Vector3(1, 0, 0), 0.0, 0.0, 1.5),
+        Sphere(Vector3(2, 0, 4), 1, Vector3(0, 1, 0), 0.0, 0.0, 1.5),
     };
 
     std::vector<Plane> planes =
     {
-        Plane(Vector3(0, -2, 0), Vector3(0, 1, 0), Vector3(1, 1, 1), 0.3),
+        Plane(Vector3(0, -2, 0), Vector3(0, 1, 0), Vector3(1.0, 0, 0), 0.0),
     };
 
     std::vector<Cube> cubes =
@@ -34,39 +34,25 @@ int main()
 
     Camera camera(Vector3(0, 2, -0.5), Vector3(-1, 0, 3), Vector3(0, 1, 0));
 
-    for (int y = 0; y < 1000; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for (int x = 0; x < 1200; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            Vector3 direction = camera.getRayDirection(x, y, 1200, 1000);
+            Vector3 direction = camera.getRayDirection(x, y, width, height);
             Vector3 color = traceRay(camera.position, direction, spheres, planes, cubes, lights, traceDepth);
             sf::Color pixelColor(
                 std::min(255, static_cast<int>(color.x * 255)),
                 std::min(255, static_cast<int>(color.y * 255)),
                 std::min(255, static_cast<int>(color.z * 255))
             );
-            image.setPixel(x, y, pixelColor);
+            image.set_pixel(x, y, 
+                std::min(255, static_cast<int>(color.x * 255)), 
+                std::min(255, static_cast<int>(color.y * 255)), 
+                std::min(255, static_cast<int>(color.z * 255)));
         }
     }
 
-    sf::Texture texture;
-    texture.loadFromImage(image);
-    sf::Sprite sprite(texture);
-
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-            {
-                window.close();
-            }
-        }
-        window.clear();
-        window.draw(sprite);
-        window.display();
-    }
+    image.write_file("output.ppm");
 
     return 0;
 }

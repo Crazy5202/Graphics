@@ -3,8 +3,9 @@
 
 #include "vector3.hpp"
 
-struct Cube
+class Cube
 {
+public:
     Vector3 min;
     Vector3 max;
     Vector3 color;

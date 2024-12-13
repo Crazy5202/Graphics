@@ -3,8 +3,9 @@
 
 #include "vector3.hpp"
 
-struct Sphere
+class Sphere
 {
+public:
     Vector3 center;
     float radius;
     Vector3 color;
