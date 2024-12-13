@@ -1,7 +1,7 @@
 #include "raytracer.hpp"
 #include "ppm.hpp"
 
-int traceDepth = 3;
+int traceDepth = 10;
 
 int main() {
     int width = 1920;
@@ -10,28 +10,27 @@ int main() {
 
     std::vector<Sphere> spheres =
     {
-        Sphere(Vector3(0, -1, 5), 1, Vector3(1, 0, 0), 0.0, 0.0, 1.5),
-        Sphere(Vector3(2, 0, 4), 1, Vector3(0, 1, 0), 0.0, 0.0, 1.5),
+        Sphere(Vector3(-2, -2, 0), 0.5, Vector3(0, 1, 0), 0.3, 0.5, 1.8),
+        Sphere(Vector3(4, 0, 2), 1, Vector3(1, 0, 0), 0.5, 0.6, 0.6),
     };
 
     std::vector<Plane> planes =
     {
-        Plane(Vector3(0, -2, 0), Vector3(0, 1, 0), Vector3(1.0, 0, 0), 0.0),
+        Plane(Vector3(5, 5, 0), Vector3(-1, -1, 0), Vector3(0.2, 0.2, 0.2), 1.0),
     };
 
     std::vector<Cube> cubes =
     {
-        Cube(Vector3(-2.5, 0, 3), Vector3(-1.5, 1, 4), Vector3(0, 0, 1), 0.4, 0.6, 1.33),
-        Cube(Vector3(0.5, 0.5, 6), Vector3(1.5, 1.5, 7), Vector3(1, 0, 1), 0.4, 0.6, 1.33),
+        Cube(Vector3(2, -1, -1), Vector3(3, 0, 0), Vector3(0, 0, 1), 0.7, 0.8, 1.0)
     };
 
     std::vector<Light> lights =
     {
-        Light(Vector3(0, 5, 0), Vector3(1, 1, 1)),
-        Light(Vector3(5, 7, 5), Vector3(0.1, 0.1, 0.1)),
+        Light(Vector3(-5, -5, 0), Vector3(1, 1, 1)),
+        Light(Vector3(7, -3, 3), Vector3(0.5, 0.5, 0.5)),
     };
 
-    Camera camera(Vector3(0, 2, -0.5), Vector3(-1, 0, 3), Vector3(0, 1, 0));
+    Camera camera(Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 0, 1));
 
     for (int y = 0; y < height; ++y)
     {
