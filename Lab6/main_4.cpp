@@ -4,7 +4,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include "parse_obj_dumb.cpp"
+#include "parse_obj.hpp"
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 const char* objectVertexShaderSource = R"(
     #version 330 core
@@ -277,7 +281,7 @@ int main() {
     }
     
     // вершины куба
-    auto cubeVertices1 = parseOBJ("/home/Maxim/Documents/Labs_5_sem/Graphics/Lab6/cone.obj");
+    auto cubeVertices1 = parseOBJ("/home/Maxim/Documents/Labs_5_sem/Graphics/Lab6/assets/objects/cone.obj");
     auto cubeVertices = cubeVertices1.data();
 
     // вершины куба
