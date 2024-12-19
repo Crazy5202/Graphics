@@ -1,7 +1,7 @@
 #include "raytracer.hpp"
 #include "ppm.hpp"
 
-int traceDepth = 10;
+int traceDepth = 4;
 
 int main() {
     int width = 1920;
