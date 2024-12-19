@@ -1,8 +1,7 @@
-#ifndef VAO_CLASS_H
-#define VAO_CLASS_H
+#pragma once
 
 #include <GL/glew.h>
-#include"VBO.h"
+#include "VBO.hpp"
 
 class VAO
 {
@@ -21,5 +20,3 @@ public:
 	// Deletes the VAO
 	void Delete();
 };
-
-#endif
