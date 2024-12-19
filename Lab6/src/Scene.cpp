@@ -1,5 +1,13 @@
 #include "Scene.hpp"
 
+struct OBJECT {
+    std::string type;
+    glm::vec3 position;
+    glm::vec3 color;
+    std::vector<float> angles;
+    float scale;
+};
+
 Scene::Scene() {
     std::ifstream file("/home/Maxim/Documents/Labs_5_sem/Graphics/Lab6/config.json");
 
@@ -31,35 +39,27 @@ Scene::Scene() {
 
     // Parse the "light" object
     const json& light = scene["light"];
-    std::string light_type = light["type"];
-    std::vector<float> light_position = light["position"];
-    std::vector<float> light_direction = light["direction"];
-    std::vector<float> light_fade = light["fade"];
-    std::vector<float> light_color = light["color"];
-    int light_rays = light["rays"];
+    lightsrc.type = light["type"];
+    lightsrc.fade = std::vector<float>(light["fade"]);
+    lightsrc.position = glm::vec3(light["position"][0], light["position"][1], light["position"][2]);
+    lightsrc.direction = glm::vec3(light["direction"][0], light["direction"][1], light["direction"][2]);
+    lightsrc.color = glm::vec3(light["color"][0], light["color"][1], light["color"][2]);
+    lightsrc.rays = light["rays"];
 
-    std::cout << "Light Type: " << light_type << std::endl;
-    std::cout << "Light Position: [" << light_position[0] << ", " << light_position[1] << ", " << light_position[2] << "]" << std::endl;
-    std::cout << "Light Direction: [" << light_direction[0] << ", " << light_direction[1] << ", " << light_direction[2] << "]" << std::endl;
-    std::cout << "Light Fade: [" << light_fade[0] << ", " << light_fade[1] << "]" << std::endl;
-    std::cout << "Light Color: [" << light_color[0] << ", " << light_color[1] << ", " << light_color[2] << "]" << std::endl;
-    std::cout << "Light Rays: " << light_rays << std::endl;
+    std::vector<OBJECT> objects;
 
-    // Parse the "objects" array
-    const json& objects = scene["objects"];
-    for (const auto& obj : objects) {
-        std::string obj_type = obj["type"];
-        std::vector<float> position = obj["position"];
-        std::vector<float> angles = obj["angles"];
-        std::vector<float> color = obj["color"];
+    // Parse the "obj_json" array
+    const json& obj_json = scene["objects"];
+    for (const auto& obj : obj_json) {
+        OBJECT temp_object;
+        temp_object.type = obj["type"];
+        temp_object.position = glm::vec3(obj["position"][0], obj["position"][1], obj["position"][2]);
+        temp_object.color = glm::vec3(obj["color"][0], obj["color"][1], obj["color"][2]);
+        temp_object.angles = std::vector<float>(obj["angles"]);
         float scale = obj["scale"];
-
-        std::cout << "Object Type: " << obj_type << std::endl;
-        std::cout << "Object Position: [" << position[0] << ", " << position[1] << ", " << position[2] << "]" << std::endl;
-        std::cout << "Object Angles: [" << angles[0] << ", " << angles[1] << ", " << angles[2] << "]" << std::endl;
-        std::cout << "Object Color: [" << color[0] << ", " << color[1] << ", " << color[2] << "]" << std::endl;
-        std::cout << "Object Scale: " << scale << std::endl;
+        objects.push_back(temp_object);
     }
+    std::cout << "HOORAY!" << std::endl;
 }
 
 bool Scene::read_config(const char* filename) {
