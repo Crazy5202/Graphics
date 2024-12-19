@@ -10,7 +10,7 @@ file(GLOB_RECURSE SOURCES LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/src
 add_library(lab_lib ${SOURCES})
 
 #add_executable(main main_4.cpp)
-add_executable(scene_loader scene_loader.cpp)
+add_executable(scene_loader main.cpp)
 
 #target_link_libraries(main lab_lib sfml-graphics sfml-window sfml-system GL GLU GLEW)
-target_link_libraries(scene_loader lab_lib sfml-graphics sfml-window sfml-system GL GLU GLEW)
+target_link_libraries(scene_loader lab_lib sfml-graphics sfml-window sfml-system GL GLU GLEW glfw)

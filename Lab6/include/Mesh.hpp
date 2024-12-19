@@ -4,7 +4,6 @@
 #include<string>
 
 #include"VAO.hpp"
-#include"EBO.hpp"
 #include"Camera.hpp"
 
 class Mesh

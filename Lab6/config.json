@@ -25,9 +25,8 @@
       }
     ],
     "camera": {
-      "type": "perspective",
-      "position": [12.0, 13.0, 14.0],
-      "direction": [15.0, 16.0, 17.0]
+      "type": "orto",
+      "FOV": 45.0
     }
   }
 }

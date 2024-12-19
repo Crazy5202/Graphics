@@ -8,8 +8,6 @@ Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices)
 	vao.Bind();
 	// Generates Vertex Buffer Object and links it to vertices
 	VBO vbo(vertices);
-	// Generates Element Buffer Object and links it to indices
-	EBO ebo(indices);
 	// Links vbo attributes such as coordinates and colors to vao
 	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)0);
 	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)(3 * sizeof(float)));
@@ -18,7 +16,6 @@ Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices)
 	// Unbind all to prevent accidentally modifying them
 	vao.Unbind();
 	vbo.Unbind();
-	ebo.Unbind();
 }
 
 

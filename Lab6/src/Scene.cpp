@@ -21,14 +21,13 @@ Scene::Scene() {
     // Parse the "camera" object
     const json& camera = scene["camera"];
     std::string camera_type = camera["type"];
-    std::vector<float> camera_position = camera["position"];
-    std::vector<float> camera_direction = camera["direction"];
 
-    camera = Camera(1920, 1080, )
-
-    std::cout << "Camera Type: " << camera_type << std::endl;
-    std::cout << "Camera Position: [" << camera_position[0] << ", " << camera_position[1] << ", " << camera_position[2] << "]" << std::endl;
-    std::cout << "Camera Direction: [" << camera_direction[0] << ", " << camera_direction[1] << ", " << camera_direction[2] << "]" << std::endl;
+    if (camera_type == "orto") {
+        cam.updateMat(cam.FOV, 0);
+    } else {
+        float newFOV = camera["FOV"];
+        cam.updateMat(newFOV, 1);
+    }
 
     // Parse the "light" object
     const json& light = scene["light"];

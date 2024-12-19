@@ -1,25 +1,32 @@
 #include"Camera.hpp"
 
-Camera::Camera(int width, int height, glm::vec3 position)
+Camera::Camera(int width, int height, int type)
 {
 	Camera::width = width;
 	Camera::height = height;
-	Position = position;
+	updateMat(75.0f, type);
 }
 
-void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
+void Camera::updateMat(float newFOV, int type)
 {
+	glm::mat4 projection = glm::mat4(1.0f);
+	if (type == 0) {
+		projType = type;
+		projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f);
+	} else {
+		projType = 1;
+		projection = glm::perspective(glm::radians(newFOV), (float)width / height, 0.1f, 100.0f);
+	}
+	FOV = newFOV;
+	
 	// Initializes matrices since otherwise they will be the null matrix
 	glm::mat4 view = glm::mat4(1.0f);
-	glm::mat4 projection = glm::mat4(1.0f);
-
+	
 	// Makes camera look in the right direction from the right position
 	view = glm::lookAt(Position, Position + Orientation, Up);
-	// Adds perspective to the scene
-	projection = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
 
 	// Sets new camera matrix
-	cameraMatrix = projection * view;
+	cameraMatrix = viewMatrix * projMatrix;
 }
 
 void Camera::Matrix(Shader& shader, const char* uniform)

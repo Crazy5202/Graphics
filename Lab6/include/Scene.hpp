@@ -16,7 +16,7 @@ class Scene
 {
 public:
     std::vector<VAO> objects;
-    Camera camera;
+    Camera cam;
 
     Scene();
     bool read_config(const char* filename);
