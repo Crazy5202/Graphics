@@ -18,7 +18,7 @@ void Camera::updateMat(float newFOV, int type)
 		projection = glm::perspective(glm::radians(newFOV), (float)width / height, 0.1f, 100.0f);
 	}
 	FOV = newFOV;
-	
+
 	// Initializes matrices since otherwise they will be the null matrix
 	glm::mat4 view = glm::mat4(1.0f);
 	
@@ -26,7 +26,7 @@ void Camera::updateMat(float newFOV, int type)
 	view = glm::lookAt(Position, Position + Orientation, Up);
 
 	// Sets new camera matrix
-	cameraMatrix = viewMatrix * projMatrix;
+	cameraMatrix = view * projection;
 }
 
 void Camera::Matrix(Shader& shader, const char* uniform)

@@ -59,6 +59,12 @@ Scene::Scene(const std::string& filePath) {
         float scale = obj["scale"];
         objects.push_back(temp_object);
     }
+    for (auto& obj: objects) {
+        auto res = parseOBJ(filePath+"/assets/objects/"+obj.type+".obj");
+        if (!res.empty()) {
+            meshes.emplace_back(res);
+        }
+    }
     std::cout << "HOORAY!" << std::endl;
 }
 

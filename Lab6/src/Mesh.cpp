@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices)
+Mesh::Mesh(std::vector <float>& vertices)
 {
 	Mesh::vertices = vertices;
 
@@ -8,8 +8,8 @@ Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices)
 	// Generates Vertex Buffer Object and links it to vertices
 	VBO vbo(vertices);
 	// Links vbo attributes such as coordinates and colors to vao
-	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)0);
-	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)(3 * sizeof(float)));
+	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(float), (void*)0);
+	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(float), (void*)(3 * sizeof(float)));
 	// Unbind all to prevent accidentally modifying them
 	vao.Unbind();
 	vbo.Unbind();
