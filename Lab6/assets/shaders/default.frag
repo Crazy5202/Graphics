@@ -9,7 +9,7 @@ in vec3 crntPos;
 in vec3 Normal;
 
 // Gets the color of the light from the main function
-uniform vec4 lightColor;
+uniform vec3 lightColor;
 // Gets the position of the light from the main function
 uniform vec3 lightPos;
 // Gets object color
@@ -17,7 +17,7 @@ uniform vec3 objectColor;
 // Gets the position of the camera from the main function
 uniform vec3 camPos;
 // type of lighting
-uniform int lightType = 0;
+uniform int lightType;
 
 vec4 pointLight()
 {	
@@ -45,7 +45,8 @@ vec4 pointLight()
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
 	float specular = specAmount * specularLight;
 
-	return (ambient + diffuse * inten + specular * inten) * objectColor * lightColor;
+	vec3 res = (ambient + diffuse * inten + specular * inten) * objectColor * lightColor;
+	return  vec4(res, 1.0);
 }
 
 vec4 direcLight()
@@ -65,7 +66,8 @@ vec4 direcLight()
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
 	float specular = specAmount * specularLight;
 
-	return (ambient + diffuse + specular) * objectColor * lightColor;
+	vec3 res = (ambient + diffuse + specular) * objectColor * lightColor;
+	return vec4(res, 1.0);
 }
 
 vec4 spotLight()
@@ -93,7 +95,8 @@ vec4 spotLight()
 	float angle = dot(vec3(0.0f, -1.0f, 0.0f), -lightDirection);
 	float inten = clamp((angle - outerCone) / (innerCone - outerCone), 0.0f, 1.0f);
 
-	return (ambient + diffuse * inten +  specular * inten) * objectColor * lightColor;
+	vec3 res = (ambient + diffuse * inten +  specular * inten) * objectColor * lightColor;
+	return vec4( res, 1.0);
 }
 
 void main()

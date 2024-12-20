@@ -28,6 +28,7 @@ public:
     std::vector<Mesh> meshes;
     Camera cam;
 
+    Shader shader;
     LightSource lightsrc;
 
     Scene(const std::string& filePath);

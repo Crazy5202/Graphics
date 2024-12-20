@@ -8,7 +8,8 @@ struct OBJECT {
     float scale;
 };
 
-Scene::Scene(const std::string& filePath) {
+// Creates scene from path
+Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/default.vert").c_str(), (filePath+"/assets/shaders/default.frag").c_str()) {
     std::ifstream file(filePath+"/config.json");
 
     // Read the file into a stringstream
@@ -81,6 +82,7 @@ Scene::Scene(const std::string& filePath) {
     std::cout << "HOORAY!" << std::endl;
 }
 
+// Parses .obj vertices and normals from path
 std::vector<float> Scene::parseOBJ(const std::string& filePath) {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
@@ -138,4 +140,11 @@ std::vector<float> Scene::parseOBJ(const std::string& filePath) {
 
     file.close();
     return data;
+}
+
+// Renders all meshes in scene
+void Scene::render() {
+    for (auto& elem: meshes) {
+        elem.Draw(shader, cam);
+    }
 }

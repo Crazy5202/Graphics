@@ -21,16 +21,17 @@ void Mesh::Draw
 	Camera& camera
 )
 {
-	// Bind shader to be able to access uniforms
 	shader.Activate();
 	vao.Bind();
 
-	// Take care of the camera Matrix
-	glUniform3f(glGetUniformLocation(shader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+	// pushing info to vertex shader
 	camera.Matrix(shader, "camMatrix");
-
-	// Push the matrices to the vertex shader
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(pos_matrix));
+
+	// pushing info to fragment shader
+	glUniform3fv(glGetUniformLocation(shader.ID, "camPos"), 1, glm::value_ptr(camera.Position));
+
+	glUniform3fv(glGetUniformLocation(shader.ID, "objectColor"), 1, glm::value_ptr(color));
 
 	// Draw the actual mesh
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());

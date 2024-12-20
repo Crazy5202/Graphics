@@ -2,8 +2,8 @@
   "scene": {
     "light": {
       "type": "spotlight",
-      "position": [0.0, 1.0, 2.0],
-      "direction": [3.0, 4.0, 5.0],
+      "position": [2.0, 2.0, 4.0],
+      "direction": [2.0, 2.0, 0.0],
       "fade": [1.0, 1.0],
       "color": [1.0, 1.0, 1.0],
       "rays": 3
@@ -11,21 +11,21 @@
     "objects": [
       {
         "type": "cube",
-        "position": [6.0, 7.0, 8.0],
+        "position": [1.0, 1.0, 0.0],
         "angles": [45.0, 45.0, 45.0],
-        "color": [1.0, 1.0, 1.0],
+        "color": [0.0, 0.0, 0.7],
         "scale": 1.5
       },
       {
         "type": "sphere",
-        "position": [9.0, 10.0, 11.0],
+        "position": [0.0, 2.0, 0.0],
         "angles": [45.0, 45.0, 45.0],
-        "color": [1.0, 1.0, 1.0],
+        "color": [0.0, 0.7, 0.0],
         "scale": 2.0
       }
     ],
     "camera": {
-      "type": "orto",
+      "type": "persp",
       "FOV": 45.0
     }
   }
