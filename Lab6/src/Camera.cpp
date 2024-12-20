@@ -12,7 +12,9 @@ void Camera::updateMat(float newFOV, int type)
 	glm::mat4 projection = glm::mat4(1.0f);
 	if (type == 0) {
 		projType = type;
-		projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f);
+		float aspect = (float)width/height;
+	
+		projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, 0.1f, 100.0f);
 	} else {
 		projType = 1;
 		projection = glm::perspective(glm::radians(newFOV), (float)width / (float)height, 0.1f, 100.0f);

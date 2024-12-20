@@ -32,7 +32,7 @@
       }
     ],
     "camera": {
-      "type": "persp",
+      "type": "orto",
       "FOV": 45.0
     }
   }
