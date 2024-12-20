@@ -10,6 +10,9 @@ struct OBJECT {
 
 // Creates scene from path
 Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/default.vert").c_str(), (filePath+"/assets/shaders/default.frag").c_str()) {
+    auto val = glGetError();
+    if (val) std::cout << "shader/camera_creation " << val << std::endl;
+    
     std::ifstream file(filePath+"/config.json");
 
     // Read the file into a stringstream
@@ -67,19 +70,21 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
         // transformation matrix
         transformationMatrix = glm::scale(transformationMatrix, glm::vec3(obj.scale));
 
-        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4 rot_x = glm::rotate(glm::mat4(1.0f), glm::radians(obj.angles[0]), glm::vec3(1.0f, 0.0f, 0.0f));
 
-        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 rot_y = glm::rotate(glm::mat4(1.0f), glm::radians(obj.angles[1]), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::mat4 rot_z = glm::rotate(glm::mat4(1.0f), glm::radians(obj.angles[2]), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        transformationMatrix = glm::translate(transformationMatrix, obj.position);
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), obj.position);
         
         if (!res.empty()) {
-            meshes.emplace_back(res, transformationMatrix, obj.color);
+            meshes.emplace_back(res, trans*rot_z*rot_y*rot_x*transformationMatrix, obj.color);
         }
+        val = glGetError();
+        if (val) std::cout << "meshes_creation " << val << std::endl;
     }
-    std::cout << "HOORAY!" << std::endl;
+    std::cout << "SCENE_CREATED" << std::endl;
 }
 
 // Parses .obj vertices and normals from path

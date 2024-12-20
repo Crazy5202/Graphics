@@ -15,7 +15,7 @@ void Camera::updateMat(float newFOV, int type)
 		projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f);
 	} else {
 		projType = 1;
-		projection = glm::perspective(glm::radians(newFOV), (float)width / height, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(newFOV), (float)width / (float)height, 0.1f, 100.0f);
 	}
 	FOV = newFOV;
 
@@ -26,12 +26,17 @@ void Camera::updateMat(float newFOV, int type)
 	view = glm::lookAt(Position, Position + Orientation, Up);
 
 	// Sets new camera matrix
-	cameraMatrix = view * projection;
+	cameraMatrix = projection*view;
 }
 
 void Camera::Matrix(Shader& shader, const char* uniform)
 {
-	// Exports camera matrix
+	/*glm::mat4 projection = glm::perspective(glm::radians(90.0f), float(width / height), 0.1f, 100.0f);
+    
+    glm::vec3 cameraPos = glm::vec3(-2.0f, -2.0f, 2.0f);
+    glm::mat4 view = glm::lookAt(cameraPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 final = projection*view;
+	// Exports camera matrix*/
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
 

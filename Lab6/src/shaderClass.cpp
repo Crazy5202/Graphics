@@ -3,6 +3,7 @@
 // Reads a text file and outputs a string with everything in the text file
 std::string get_file_contents(const char* filename)
 {
+	//std::cout << filename << std::endl;
 	std::ifstream in(filename, std::ios::binary);
 	if (in)
 	{
@@ -13,13 +14,15 @@ std::string get_file_contents(const char* filename)
 		in.read(&contents[0], contents.size());
 		in.close();
 		return(contents);
+	} else {
+		std::cout << "Shader parsing error: " << errno << std::endl;
 	}
-	throw(errno);
 }
 
 // Constructor that build the Shader Program from 2 different shaders
 Shader::Shader(const char* vertexFile, const char* fragmentFile)
 {
+	
 	// Read vertexFile and fragmentFile and store the strings
 	std::string vertexCode = get_file_contents(vertexFile);
 	std::string fragmentCode = get_file_contents(fragmentFile);
@@ -59,7 +62,7 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
 	// Delete the now useless Vertex and Fragment Shader objects
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-
+	
 }
 
 // Activates the Shader Program

@@ -8,8 +8,8 @@ Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color): 
 	// Generates Vertex Buffer Object and links it to vertices
 	VBO vbo(vertices);
 	// Links vbo attributes such as coordinates and colors to vao
-	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(float), (void*)0);
-	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(float), (void*)(3 * sizeof(float)));
+	vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 6*sizeof(float), (void*)0);
+	vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 6*sizeof(float), (void*)(3 * sizeof(float)));
 	// Unbind all to prevent accidentally modifying them
 	vao.Unbind();
 	vbo.Unbind();
@@ -30,7 +30,6 @@ void Mesh::Draw
 
 	// pushing info to fragment shader
 	glUniform3fv(glGetUniformLocation(shader.ID, "camPos"), 1, glm::value_ptr(camera.Position));
-
 	glUniform3fv(glGetUniformLocation(shader.ID, "objectColor"), 1, glm::value_ptr(color));
 
 	// Draw the actual mesh

@@ -11,17 +11,24 @@
     "objects": [
       {
         "type": "cube",
-        "position": [1.0, 1.0, 0.0],
-        "angles": [45.0, 45.0, 45.0],
+        "position": [3.0, 3.0, 0.0],
+        "angles": [180.0, 0.0, 0.0],
         "color": [0.0, 0.0, 0.7],
-        "scale": 1.5
+        "scale": 1.0
       },
       {
         "type": "sphere",
-        "position": [0.0, 2.0, 0.0],
+        "position": [0.0, 2.0, 2.0],
         "angles": [45.0, 45.0, 45.0],
         "color": [0.0, 0.7, 0.0],
-        "scale": 2.0
+        "scale": 1.0
+      },
+      {
+        "type": "plane",
+        "position": [0.0, 0.0, 0.0],
+        "angles": [0.0, 0.0, 0.0],
+        "color": [1.0, 1.0, 1.0],
+        "scale": 100.0
       }
     ],
     "camera": {

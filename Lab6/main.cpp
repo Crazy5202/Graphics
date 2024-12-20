@@ -15,7 +15,7 @@ int main() {
 		glfwTerminate();
 		return -1;
 	}
-
+    
 	glfwMakeContextCurrent(window);
 
 	glewInit();
@@ -24,15 +24,22 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);    
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glDisable(GL_CULL_FACE);
 
     auto lab_path = std::filesystem::current_path().parent_path().string();
     Scene scene(lab_path);
+    //std::cout << "HERE!" << std::endl;
+    auto val = glGetError();
+    if (val) std::cout << "scene_creation " << val << std::endl;
     scene.shader.Activate();
     
     int type = 1;
 	glUniform3fv(glGetUniformLocation(scene.shader.ID, "lightColor"), 1, glm::value_ptr(scene.lightsrc.color));
 	glUniform3fv(glGetUniformLocation(scene.shader.ID, "lightPos"), 1, glm::value_ptr(scene.lightsrc.position));
-    glUniform1d(glGetUniformLocation(scene.shader.ID, "lightType"), type);
+    glUniform1i(glGetUniformLocation(scene.shader.ID, "lightType"), type);
+    
+    val = glGetError();
+    if (val) std::cout << "passing_to_shader_main " << val << std::endl;
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -42,8 +49,15 @@ int main() {
 
 		// Handles camera inputs
 		scene.cam.Inputs(window);
+        
+        val = glGetError();
+        if (val) std::cout << "camera " << val << std::endl;
+
         // Render all objects
         scene.render();
+
+        val = glGetError();
+        if (val) std::cout << "scene "  << val << std::endl;
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
