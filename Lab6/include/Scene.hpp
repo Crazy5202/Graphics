@@ -11,6 +11,7 @@ using json = nlohmann::json;
 #include <sstream>
 #include <string>
 #include <vector>
+#include <glm/glm.hpp>
 
 struct LightSource {
     std::string type;

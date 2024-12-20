@@ -56,13 +56,30 @@ Scene::Scene(const std::string& filePath) {
         temp_object.position = glm::vec3(obj["position"][0], obj["position"][1], obj["position"][2]);
         temp_object.color = glm::vec3(obj["color"][0], obj["color"][1], obj["color"][2]);
         temp_object.angles = std::vector<float>(obj["angles"]);
-        float scale = obj["scale"];
+        temp_object.scale = obj["scale"];
         objects.push_back(temp_object);
     }
     for (auto& obj: objects) {
         auto res = parseOBJ(filePath+"/assets/objects/"+obj.type+".obj");
+        glm::mat4 transformationMatrix = glm::mat4(1.0f);
+
+        // 1. Масштабирование
+        transformationMatrix = glm::scale(transformationMatrix, glm::vec3(obj.scale));
+
+        // 2. Поворот по оси X
+        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        // 3. Поворот по оси Y
+        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        // 4. Поворот по оси Z
+        transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // 5. Перемещение
+        transformationMatrix = glm::translate(transformationMatrix, obj.position);
+        
         if (!res.empty()) {
-            meshes.emplace_back(res);
+            meshes.emplace_back(res, transformationMatrix);
         }
     }
     std::cout << "HOORAY!" << std::endl;
