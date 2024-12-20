@@ -10,10 +10,9 @@ class Mesh
 {
 public:
 	std::vector <Vertex> vertices;
-	std::vector <GLuint> indices;
 	// Store VAO in public so it can be used in the Draw function
 	VAO vao;
-
+	glm::mat4 pos_matrix;
 	// Initializes the mesh
 	Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices);
 

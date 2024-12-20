@@ -3,7 +3,7 @@
 #include "json.hpp"
 using json = nlohmann::json;
 
-#include "VAO.hpp"
+#include "Mesh.hpp"
 #include "Camera.hpp"
 
 #include <iostream>
@@ -24,12 +24,12 @@ struct LightSource {
 class Scene
 {
 public:
-    std::vector<VAO> objects;
+    std::vector<Mesh> meshes;
     Camera cam;
 
     LightSource lightsrc;
 
-    Scene();
-    bool read_config(const char* filename);
+    Scene(const std::string& filePath);
+    std::vector<float> parseOBJ(const std::string& filePath);
     void render();
 };
