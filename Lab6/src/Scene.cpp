@@ -75,7 +75,7 @@ Scene::Scene(const std::string& filePath) {
         transformationMatrix = glm::translate(transformationMatrix, obj.position);
         
         if (!res.empty()) {
-            meshes.emplace_back(res, transformationMatrix);
+            meshes.emplace_back(res, transformationMatrix, obj.color);
         }
     }
     std::cout << "HOORAY!" << std::endl;

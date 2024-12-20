@@ -1,5 +1,4 @@
-#ifndef MESH_CLASS_H
-#define MESH_CLASS_H
+#pragma once
 
 #include<string>
 
@@ -12,9 +11,11 @@ public:
 	std::vector <float> vertices;
 	// Store VAO in public so it can be used in the Draw function
 	VAO vao;
+	// matrix and color
 	glm::mat4 pos_matrix;
+	glm::vec3 color;
 	// Initializes the mesh
-	Mesh(std::vector <float>& vertices, glm::mat4 _pos_matrix);
+	Mesh(std::vector <float>& vertices, glm::mat4 _pos_matrix, glm::vec3 color);
 
 	// Draws the mesh
 	void Draw
@@ -23,4 +24,3 @@ public:
 		Camera& camera
 	);
 };
-#endif

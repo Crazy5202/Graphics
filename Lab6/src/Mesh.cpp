@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix): pos_matrix(_matrix)
+Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color): pos_matrix(_matrix), color(_color)
 {
 	Mesh::vertices = vertices;
 
