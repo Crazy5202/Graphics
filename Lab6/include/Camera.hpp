@@ -39,9 +39,6 @@ public:
 
 	Camera(): Camera(1920, 1080, 1) {};
 
-	// Updates the camera matrix to the Vertex Shader
-	void updateFov(float FOVdeg);
-
 	void updateMat(float FOVdeg, int type);
 	// Exports the camera matrix to a shader
 	void Matrix(Shader& shader, const char* uniform);

@@ -63,19 +63,15 @@ Scene::Scene(const std::string& filePath) {
         auto res = parseOBJ(filePath+"/assets/objects/"+obj.type+".obj");
         glm::mat4 transformationMatrix = glm::mat4(1.0f);
 
-        // 1. Масштабирование
+        // transformation matrix
         transformationMatrix = glm::scale(transformationMatrix, glm::vec3(obj.scale));
 
-        // 2. Поворот по оси X
         transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[0]), glm::vec3(1.0f, 0.0f, 0.0f));
 
-        // 3. Поворот по оси Y
         transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[1]), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        // 4. Поворот по оси Z
         transformationMatrix = glm::rotate(transformationMatrix, glm::radians(obj.angles[2]), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        // 5. Перемещение
         transformationMatrix = glm::translate(transformationMatrix, obj.position);
         
         if (!res.empty()) {
