@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color): pos_matrix(_matrix), color(_color)
+Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color, std::vector<float> _minmax): pos_matrix(_matrix), color(_color), minmax(_minmax)
 {
 	Mesh::vertices = vertices;
 

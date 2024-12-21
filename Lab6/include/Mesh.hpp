@@ -14,8 +14,9 @@ public:
 	// matrix and color
 	glm::mat4 pos_matrix;
 	glm::vec3 color;
+	std::vector<float> minmax;
 	// Initializes the mesh
-	Mesh(std::vector <float>& vertices, glm::mat4 _pos_matrix, glm::vec3 color);
+	Mesh(std::vector <float>& vertices, glm::mat4 _pos_matrix, glm::vec3 color, std::vector<float> _minmax);
 
 	// Draws the mesh
 	void Draw

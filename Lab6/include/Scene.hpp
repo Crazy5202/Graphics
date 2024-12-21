@@ -30,6 +30,6 @@ public:
     LightSource lightsrc;
 
     Scene(const std::string& filePath);
-    std::vector<float> parseOBJ(const std::string& filePath);
+    std::vector<float> parseOBJ(const std::string& filePath, std::vector<float>& minmax);
     void render();
 };

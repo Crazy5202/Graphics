@@ -53,7 +53,8 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
         objects.push_back(temp_object);
     }
     for (auto& obj: objects) {
-        auto res = parseOBJ(filePath+"/assets/objects/"+obj.type+".obj");
+        std::vector<float> minmax;
+        auto res = parseOBJ(filePath+"/assets/objects/"+obj.type+".obj", minmax);
         glm::mat4 transformationMatrix = glm::mat4(1.0f);
 
         // transformation matrix
@@ -68,7 +69,7 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), obj.position);
         
         if (!res.empty()) {
-            meshes.emplace_back(res, trans*rot_z*rot_y*rot_x*transformationMatrix, obj.color);
+            meshes.emplace_back(res, trans*rot_z*rot_y*rot_x*transformationMatrix, obj.color, minmax);
         }
         val = glGetError();
         if (val) std::cout << "meshes_creation " << val << std::endl;
@@ -77,7 +78,7 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
 }
 
 // Parses .obj vertices and normals from path
-std::vector<float> Scene::parseOBJ(const std::string& filePath) {
+std::vector<float> Scene::parseOBJ(const std::string& filePath, std::vector<float>& minmax) {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<float> data;
@@ -87,6 +88,10 @@ std::vector<float> Scene::parseOBJ(const std::string& filePath) {
         std::cerr << "Failed to open file: " << filePath << std::endl;
         return data;
     }
+
+    std::vector<float> xs;
+    std::vector<float> ys;
+    std::vector<float> zs;
 
     std::string line;
     while (std::getline(file, line)) {
@@ -98,6 +103,9 @@ std::vector<float> Scene::parseOBJ(const std::string& filePath) {
             float x, y, z;
             lineStream >> x >> y >> z;
             positions.emplace_back(x, y, z);
+            xs.push_back(x);
+            ys.push_back(y);
+            zs.push_back(z);
         } else if (prefix == "vn") {
             float x, y, z;
             lineStream >> x >> y >> z;
@@ -131,7 +139,13 @@ std::vector<float> Scene::parseOBJ(const std::string& filePath) {
             }
         }
     }
-
+    
+    minmax.push_back(*std::min(xs.begin(), xs.end()));
+    minmax.push_back(*std::max(xs.begin(), xs.end()));
+    minmax.push_back(*std::min(ys.begin(), ys.end()));
+    minmax.push_back(*std::max(ys.begin(), ys.end()));
+    minmax.push_back(*std::min(zs.begin(), zs.end()));
+    minmax.push_back(*std::max(zs.begin(), zs.end()));
     file.close();
     return data;
 }
