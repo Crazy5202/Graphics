@@ -74,7 +74,7 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
         val = glGetError();
         if (val) std::cout << "meshes_creation " << val << std::endl;
     }
-    std::cout << "SCENE_CREATED" << std::endl;
+    //std::cout << "SCENE_CREATED" << std::endl;
 }
 
 // Parses .obj vertices and normals from path
@@ -140,12 +140,12 @@ std::vector<float> Scene::parseOBJ(const std::string& filePath, std::vector<floa
         }
     }
     
-    minmax.push_back(*std::min(xs.begin(), xs.end()));
-    minmax.push_back(*std::max(xs.begin(), xs.end()));
-    minmax.push_back(*std::min(ys.begin(), ys.end()));
-    minmax.push_back(*std::max(ys.begin(), ys.end()));
-    minmax.push_back(*std::min(zs.begin(), zs.end()));
-    minmax.push_back(*std::max(zs.begin(), zs.end()));
+    minmax.push_back(*std::min_element(xs.begin(), xs.end()));
+    minmax.push_back(*std::max_element(xs.begin(), xs.end()));
+    minmax.push_back(*std::min_element(ys.begin(), ys.end()));
+    minmax.push_back(*std::max_element(ys.begin(), ys.end()));
+    minmax.push_back(*std::min_element(zs.begin(), zs.end()));
+    minmax.push_back(*std::max_element(zs.begin(), zs.end()));
     file.close();
     return data;
 }

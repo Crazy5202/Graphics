@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color, std::vector<float> _minmax): pos_matrix(_matrix), color(_color), minmax(_minmax)
+Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color, std::vector<float> minmax): pos_matrix(_matrix), color(_color)
 {
 	Mesh::vertices = vertices;
 
@@ -13,13 +13,14 @@ Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color, s
 	// Unbind all to prevent accidentally modifying them
 	vao.Unbind();
 	vbo.Unbind();
+
+	glm::vec4 temp_vec1 = pos_matrix*glm::vec4(minmax[0], minmax[2], minmax[4], 1.0);
+	glm::vec4 temp_vec2 = pos_matrix*glm::vec4(minmax[1], minmax[3], minmax[5], 1.0);
+	min_pos = glm::vec3(std::min(temp_vec1.x, temp_vec2.x), std::min(temp_vec1.y, temp_vec2.y), std::min(temp_vec1.z, temp_vec2.z));
+	max_pos = glm::vec3(std::max(temp_vec1.x, temp_vec2.x), std::max(temp_vec1.y, temp_vec2.y), std::max(temp_vec1.z, temp_vec2.z));
 }
 
-void Mesh::Draw
-(
-	Shader& shader, 
-	Camera& camera
-)
+void Mesh::Draw(Shader& shader, Camera& camera)
 {
 	shader.Activate();
 	vao.Bind();
@@ -34,4 +35,11 @@ void Mesh::Draw
 
 	// Draw the actual mesh
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+}
+
+bool Mesh::check_intersect(glm::vec3& position) {
+	if (position.x >= min_pos.x and position.x <= max_pos.x and position.y >= min_pos.y and position.y<= max_pos.y and position.z >= min_pos.z and position.z <= max_pos.z) {
+		return true;
+	}
+	return false;
 }
