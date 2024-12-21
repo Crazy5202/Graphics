@@ -61,7 +61,7 @@ vec4 direcLight()
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
-	vec3 lightDirection = normalize(vec3(1.0f, 1.0f, 0.0f));
+	vec3 lightDirection = normalize(-lightPointed);
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
 	// specular lighting
@@ -114,9 +114,9 @@ vec4 spotLight()
 void main()
 {
 	FragColor = vec4(0.0);
-	if (lightType == 0) {
+	if (lightType == 1) {
         FragColor = pointLight();
-    } else if (lightType == 1) {
+    } else if (lightType == 2) {
         FragColor = direcLight();
     } else {
 		FragColor = spotLight();
