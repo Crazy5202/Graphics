@@ -80,12 +80,14 @@ int main() {
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
+		
 		for (auto it = scene.meshes.begin(); it != scene.meshes.end(); ++it) {
 			if (it->check_intersect(scene.cam.Position)) {
 				scene.meshes.erase(it);
 				break;
 			}
 		}
+		
 
 		crntTime = glfwGetTime();
 		timeDiff = crntTime - prevTime;

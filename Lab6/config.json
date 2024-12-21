@@ -1,25 +1,53 @@
 {
   "scene": {
     "light": {
-      "position": [1.0, 1.0, 4.0],
-      "direction": [1.0, 1.0, -1.0],
+      "position": [2.5, 2.5, 10.0],
+      "direction": [0.0, 0.0, -1.0],
       "fade": [0.01, 0.01],
       "color": [1.0, 1.0, 1.0]
     },
     "objects": [
       {
         "type": "cube",
-        "position": [3.0, 3.0, 0.0],
-        "angles": [180.0, 0.0, 0.0],
+        "position": [5.0, 1.0, 0.0],
+        "angles": [0.0, 0.0, 0.0],
         "color": [0.0, 0.0, 0.7],
         "scale": 1.0
       },
       {
         "type": "monkey",
-        "position": [2.0, 2.0, 2.0],
-        "angles": [0.0, 0.0, 0.0],
-        "color": [0.0, 0.7, 0.7],
+        "position": [5.0, 1.0, 2.0],
+        "angles": [0.0, 0.0, -90.0],
+        "color": [0.7, 0.0, 0.0],
         "scale": 1.0
+      },
+      {
+        "type": "plane",
+        "position": [0.0, -5.0, 0.0],
+        "angles": [90.0, 0.0, 0.0],
+        "color": [0.0, 1.0, 1.0],
+        "scale": 100.0
+      },
+      {
+        "type": "plane",
+        "position": [-5.0, 0.0, 0.0],
+        "angles": [0.0, 90.0, 0.0],
+        "color": [1.0, 0.0, 1.0],
+        "scale": 100.0
+      },
+      {
+        "type": "plane",
+        "position": [10.0, 0.0, 0.0],
+        "angles": [90.0, 0.0, 90.0],
+        "color": [1.0, 1.0, 0.0],
+        "scale": 100.0
+      },
+      {
+        "type": "plane",
+        "position": [0.0, 10.0, 0.0],
+        "angles": [0.0, 90.0, 90.0],
+        "color": [1.0, 1.0, 1.0],
+        "scale": 100.0
       },
       {
         "type": "plane",
