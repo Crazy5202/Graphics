@@ -19,7 +19,6 @@ struct LightSource {
     glm::vec3 direction;
     glm::vec3 color;
     std::vector<float> fade;
-    int rays;
 };
 
 class Scene

@@ -12,10 +12,15 @@ in vec3 Normal;
 uniform vec3 lightColor;
 // Gets the position of the light from the main function
 uniform vec3 lightPos;
+// Sets values for light distance
+uniform vec2 fade;
+// Sets values for light direction
+uniform vec3 lightPointed;
 // Gets object color
 uniform vec3 objectColor;
 // Gets the position of the camera from the main function
 uniform vec3 camPos;
+
 // type of lighting
 uniform int lightType;
 
@@ -26,8 +31,8 @@ vec4 pointLight()
 
 	// intensity of light with respect to distance
 	float dist = length(lightVec);
-	float a = 3.0;
-	float b = 0.7;
+	float a = fade.x;
+	float b = fade.y;
 	float inten = 1.0f / (a * dist * dist + b * dist + 1.0f);
 
 	// ambient lighting
@@ -72,31 +77,38 @@ vec4 direcLight()
 
 vec4 spotLight()
 {
-	// controls how big the area that is lit up is
-	float outerCone = 0.90f;
-	float innerCone = 0.95f;
+    vec3 lightDir = normalize(lightPos - crntPos);
+    float theta = dot(lightDir, -lightPointed);
+    float cutOff = cos(radians(45.0));
 
 	// ambient lighting
-	float ambient = 0.20f;
+    float ambientStrength = 0.1;
+    vec3 ambient = ambientStrength * lightColor;
 
-	// diffuse lighting
-	vec3 normal = normalize(Normal);
-	vec3 lightDirection = normalize(lightPos - crntPos);
-	float diffuse = max(dot(normal, lightDirection), 0.0f);
+    vec3 result;
+    if (theta > cutOff) 
+    {
+        // diff lighting
+        vec3 norm = normalize(Normal);
+            
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = diff * lightColor;
+            
+        // specular lighting
+        float specularStrength = 1.0;
+        vec3 viewDir = normalize(camPos - crntPos);
+        vec3 reflectDir = reflect(-lightDir, norm);  
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        vec3 specular = specularStrength * spec * lightColor;
 
-	// specular lighting
-	float specularLight = 0.50f;
-	vec3 viewDirection = normalize(camPos - crntPos);
-	vec3 reflectionDirection = reflect(-lightDirection, normal);
-	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
-	float specular = specAmount * specularLight;
-
-	// calculates the intensity of the crntPos based on its angle to the center of the light cone
-	float angle = dot(vec3(0.0f, -1.0f, 0.0f), -lightDirection);
-	float inten = clamp((angle - outerCone) / (innerCone - outerCone), 0.0f, 1.0f);
-
-	vec3 res = (ambient + diffuse * inten +  specular * inten) * objectColor * lightColor;
-	return vec4( res, 1.0);
+        // result
+        result = (ambient + diffuse + specular) * objectColor;
+    } 
+    else 
+    {
+        result = ambient * objectColor;
+    }
+	return vec4(result, 1.0);
 }
 
 void main()

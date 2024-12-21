@@ -43,9 +43,11 @@ int main() {
     if (val) std::cout << "scene_creation " << val << std::endl;
     scene.shader.Activate();
     
-    int type = 1;
+    int type = 2;
 	glUniform3fv(glGetUniformLocation(scene.shader.ID, "lightColor"), 1, glm::value_ptr(scene.lightsrc.color));
 	glUniform3fv(glGetUniformLocation(scene.shader.ID, "lightPos"), 1, glm::value_ptr(scene.lightsrc.position));
+	glUniform3fv(glGetUniformLocation(scene.shader.ID, "lightPointed"), 1, glm::value_ptr(scene.lightsrc.direction));
+	glUniform2f(glGetUniformLocation(scene.shader.ID, "fade"), scene.lightsrc.fade[0], scene.lightsrc.fade[1]);
     glUniform1i(glGetUniformLocation(scene.shader.ID, "lightType"), type);
     
     val = glGetError();

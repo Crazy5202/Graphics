@@ -3,10 +3,9 @@
     "light": {
       "type": "spotlight",
       "position": [2.0, 2.0, 4.0],
-      "direction": [2.0, 2.0, 0.0],
-      "fade": [1.0, 1.0],
-      "color": [1.0, 1.0, 1.0],
-      "rays": 3
+      "direction": [0.0, 0.0, -1.0],
+      "fade": [0.01, 0.01],
+      "color": [1.0, 1.0, 1.0]
     },
     "objects": [
       {
@@ -18,8 +17,8 @@
       },
       {
         "type": "sphere",
-        "position": [0.0, 2.0, 2.0],
-        "angles": [45.0, 45.0, 45.0],
+        "position": [2.0, 2.0, 2.0],
+        "angles": [0.0, 0.0, 0.0],
         "color": [0.0, 0.7, 0.0],
         "scale": 1.0
       },

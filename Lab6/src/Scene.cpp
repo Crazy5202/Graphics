@@ -48,7 +48,6 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
     lightsrc.position = glm::vec3(light["position"][0], light["position"][1], light["position"][2]);
     lightsrc.direction = glm::vec3(light["direction"][0], light["direction"][1], light["direction"][2]);
     lightsrc.color = glm::vec3(light["color"][0], light["color"][1], light["color"][2]);
-    lightsrc.rays = light["rays"];
 
     std::vector<OBJECT> objects;
 
