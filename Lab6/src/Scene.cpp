@@ -37,8 +37,8 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
     if (camera_type == "orto") {
         cam.updateMat(cam.FOV, 0);
     } else {
-        float newFOV = camera["FOV"];
-        cam.updateMat(newFOV, 1);
+        //float newFOV = camera["FOV"];
+        cam.updateMat(cam.FOV, 1);
     }
 
     // Parse the "light" object

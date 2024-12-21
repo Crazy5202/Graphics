@@ -1,6 +1,16 @@
 #include "Scene.hpp"
 #include <filesystem>
 
+float FOV = 75.0f;
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    if (yoffset > 0) {
+        FOV = std::max(FOV - 5.0f, 30.0f);
+    } else if (yoffset < 0) {
+		FOV = std::min(FOV + 5.0f, 90.0f);
+    }
+}
+
 int main() {
 
     int width = 1920, height = 1080;
@@ -41,6 +51,8 @@ int main() {
     val = glGetError();
     if (val) std::cout << "passing_to_shader_main " << val << std::endl;
 
+	glfwSetScrollCallback(window, scroll_callback);
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -48,8 +60,9 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Handles camera inputs
+		scene.cam.FOV = FOV;
 		scene.cam.Inputs(window);
-        
+
         val = glGetError();
         if (val) std::cout << "camera " << val << std::endl;
 
