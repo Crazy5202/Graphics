@@ -30,20 +30,10 @@ Scene::Scene(const std::string& filePath): shader((filePath+"/assets/shaders/def
     // Access the "scene" object
     const json& scene = j["scene"];
 
-    // Parse the "camera" object
-    const json& camera = scene["camera"];
-    std::string camera_type = camera["type"];
-
-    if (camera_type == "orto") {
-        cam.updateMat(cam.FOV, 0);
-    } else {
-        //float newFOV = camera["FOV"];
-        cam.updateMat(cam.FOV, 1);
-    }
+    cam.updateMat(cam.FOV, 1);
 
     // Parse the "light" object
     const json& light = scene["light"];
-    lightsrc.type = light["type"];
     lightsrc.fade = std::vector<float>(light["fade"]);
     lightsrc.position = glm::vec3(light["position"][0], light["position"][1], light["position"][2]);
     lightsrc.direction = glm::vec3(light["direction"][0], light["direction"][1], light["direction"][2]);

@@ -14,7 +14,6 @@ using json = nlohmann::json;
 #include <glm/glm.hpp>
 
 struct LightSource {
-    std::string type;
     glm::vec3 position;
     glm::vec3 direction;
     glm::vec3 color;
