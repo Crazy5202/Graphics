@@ -16,8 +16,8 @@ Mesh::Mesh(std::vector <float>& vertices, glm::mat4 _matrix, glm::vec3 _color, s
 
 	glm::vec4 temp_vec1 = pos_matrix*glm::vec4(minmax[0], minmax[2], minmax[4], 1.0);
 	glm::vec4 temp_vec2 = pos_matrix*glm::vec4(minmax[1], minmax[3], minmax[5], 1.0);
-	min_pos = glm::vec3(std::min(temp_vec1.x, temp_vec2.x), std::min(temp_vec1.y, temp_vec2.y), std::min(temp_vec1.z, temp_vec2.z));
-	max_pos = glm::vec3(std::max(temp_vec1.x, temp_vec2.x), std::max(temp_vec1.y, temp_vec2.y), std::max(temp_vec1.z, temp_vec2.z));
+	min_pos = glm::vec3(std::min(temp_vec1.x, temp_vec2.x), std::min(temp_vec1.y, temp_vec2.y), std::min(temp_vec1.z, temp_vec2.z)) - glm::vec3(0.1f);
+	max_pos = glm::vec3(std::max(temp_vec1.x, temp_vec2.x), std::max(temp_vec1.y, temp_vec2.y), std::max(temp_vec1.z, temp_vec2.z)) + glm::vec3(0.1f);
 }
 
 void Mesh::Draw(Shader& shader, Camera& camera)
